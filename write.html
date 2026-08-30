@@ -10742,14 +10742,20 @@ function setDistracted(v){
 let focusRetry=null;
 function playFocus(){
   if(isDistracted) return;               // 分心态不播专注视频
+  // 未开启监测时专注视频被 CSS 隐藏（待机是插画），此时播放纯属白耗资源。
+  // 统一在此拦住：各处 loadeddata/canplay/交互/可见性 等补播调用都无需再单独判断。
+  if(!monitoring) return;
   try{
     focusVideo.muted=true;               // 静音才能自动播放
     focusVideo.playsInline=true;
     const p=focusVideo.play();
     if(p&&p.catch) p.catch(()=>{
       // 被自动播放策略拦截 → 短暂后重试一次
+      // 需同时确认监测仍开启：否则关闭监测后这次重试会让隐藏的视频在后台空跑
       clearTimeout(focusRetry);
-      focusRetry=setTimeout(()=>{ if(!isDistracted){ const q=focusVideo.play(); if(q&&q.catch) q.catch(()=>{}); } }, 400);
+      focusRetry=setTimeout(()=>{
+        if(!isDistracted && monitoring){ const q=focusVideo.play(); if(q&&q.catch) q.catch(()=>{}); }
+      }, 400);
     });
   }catch(e){}
 }
@@ -11080,7 +11086,6 @@ async function startMonitoring(){
 }
 function stopMonitoring(){
   monitoring=false;
-  tjStage.classList.remove("monitoring");  // 回到待机插画
   if(rafId) cancelAnimationFrame(rafId);
   if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
   camVideo.srcObject=null;
@@ -11090,6 +11095,16 @@ function stopMonitoring(){
     ? "下载后可用监测"
     : "专注监测";
   setDistracted(false);
+  /* 关键顺序：先 setDistracted(false)（它会 hideBark + playFocus），最后再收尾。
+     否则 showFocusNow() 留下的内联 display:block 会盖过
+     `.tj-stage:not(.monitoring) .focus{display:none}`，
+     导致待机插画与专注视频同时可见（短暂重合）。 */
+  clearTimeout(focusRetry);
+  try{ focusVideo.pause(); }catch(e){}
+  focusVideo.style.display="";      // 交回 CSS 控制
+  barkVideo.style.display="";
+  barkFallback.style.display="none";
+  tjStage.classList.remove("monitoring");  // 最后一步切回待机插画，避免中间态重合
 }
 
 /* 摄像头可用性判定 + 沙箱逃逸。
@@ -11352,6 +11367,7 @@ if(new URLSearchParams(location.search).get("debug")==="bark"){
 if(new URLSearchParams(location.search).get("debug")==="cam"){
   window.__debugShowFocusNow=showFocusNow;
   window.__debugCheckMuted=checkMutedAndWarn;
+  window.__debugStopMonitoring=stopMonitoring;
   window.__debugSetMonitoring=(v)=>{ monitoring=v; if(v) tjStage.classList.add("monitoring"); else tjStage.classList.remove("monitoring"); };
 }
 </script>
