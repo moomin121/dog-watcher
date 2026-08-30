@@ -10419,11 +10419,11 @@ l95tV0Z347v2LifLPpO+Icny
     </div>
   </div>
 
-  <!-- 静音提醒弹窗：授权摄像头后若检测到设备静音则弹出 -->
+  <!-- 声音提醒弹窗：授权摄像头后按具体原因动态填写标题与说明 -->
   <div class="modal-mask" id="muteMask">
     <div class="modal">
-      <h3>请打开电脑声音</h3>
-      <p>狗狗督察需要你打开电脑声音，方便监测。</p>
+      <h3 id="muteTitle">请打开电脑声音</h3>
+      <p id="muteDesc">狗狗督察需要你打开电脑声音，方便监测。</p>
       <div class="modal-actions">
         <button class="btn btn-primary" id="muteOk">知道了</button>
       </div>
@@ -10761,6 +10761,18 @@ function distractVolume(){
   return Math.max(0, Math.min(1, v));
 }
 let barkRetry=null;
+/* 声音提醒弹窗的统一入口（定义在 playBark 之前，供其在播放被拒时调用）。
+   三种成因各自给出可执行的下一步，避免笼统的「请打开声音」。 */
+let barkSilentWarned=false;   // 本次会话是否已就「分心却没声」提醒过
+function warnSound(title,desc){
+  try{
+    const t=document.getElementById("muteTitle"), d=document.getElementById("muteDesc"),
+          m=document.getElementById("muteMask");
+    if(t) t.textContent=title;
+    if(d) d.textContent=desc;
+    if(m) m.classList.add("show");
+  }catch(e){}
+}
 function playBark(){
   if(!isDistracted) return;
   barkVideo.loop=true;
@@ -10776,6 +10788,12 @@ function playBark(){
       barkFallback.style.display="flex";
       clearTimeout(barkRetry);
       barkRetry=setTimeout(()=>{ if(isDistracted) playBark(); },400);
+      // 真正分心却发不出声：此刻提醒最有价值。整个会话只提示一次，避免反复打扰。
+      if(!barkSilentWarned){
+        barkSilentWarned=true;
+        warnSound("狗狗叫不出声",
+          "你已分心，但浏览器拦住了声音播放。请在页面上点击一下解锁，并确认电脑音量已打开。");
+      }
     });
   }catch(e){}
 }
@@ -10990,12 +11008,16 @@ function showFocusNow(){
      ③ 系统静音无法检测，故首次开启监测时提醒一次（记在本机，不重复打扰）。 */
 const MUTE_TIP_KEY="fw_mute_tip_shown";
 async function checkMutedAndWarn(){
-  const showWarn=()=>{ try{ muteMask.classList.add("show"); }catch(e){} };
   try{
-    // ① 元素层面静音（可靠判据）
-    if(barkVideo.muted || barkVideo.volume===0){ showWarn(); return; }
+    // ① 视频被静音或音量为 0（可靠判据）→ 自动修复并告知
+    if(barkVideo.muted || barkVideo.volume===0){
+      try{ barkVideo.muted=false; barkVideo.volume=VOL_MIN; }catch(e){}
+      warnSound("狗狗的声音被关掉了",
+        "分心视频处于静音状态，已帮你恢复。请同时确认电脑音量已打开，否则分心时听不到狗狗提醒。");
+      return;
+    }
 
-    // ② 带声播放是否被拦截：静默试播一小段，被拒说明分心时也发不出声
+    // ② 带声播放被浏览器拦截：静默试播一次，被拒说明分心时也发不出声
     let blocked=false;
     try{
       barkVideo.muted=false;
@@ -11003,12 +11025,17 @@ async function checkMutedAndWarn(){
       await barkVideo.play();
       barkVideo.pause(); barkVideo.currentTime=0;
     }catch(e){ blocked=true; }
-    if(blocked){ showWarn(); return; }
+    if(blocked){
+      warnSound("声音还没被允许播放",
+        "浏览器暂时拦住了自动发声。请在页面上任意点击一下即可解锁；同时记得打开电脑音量。");
+      return;
+    }
 
-    // ③ 系统静音检测不到 → 首次开启时提醒一次
+    // ③ 系统静音无法检测（浏览器不提供接口）→ 首次开启时提醒一次
     if(lsGet(MUTE_TIP_KEY)!=="1"){
       lsSet(MUTE_TIP_KEY,"1");
-      showWarn();
+      warnSound("请打开电脑声音",
+        "狗狗督察需要你打开电脑声音，方便监测。");
     }
   }catch(e){ /* 检测失败不打扰用户 */ }
 }
