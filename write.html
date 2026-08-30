@@ -10419,6 +10419,17 @@ l95tV0Z347v2LifLPpO+Icny
     </div>
   </div>
 
+  <!-- 静音提醒弹窗：授权摄像头后若检测到设备静音则弹出 -->
+  <div class="modal-mask" id="muteMask">
+    <div class="modal">
+      <h3>请打开电脑声音</h3>
+      <p>狗狗督察需要你打开电脑声音，方便监测。</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="muteOk">知道了</button>
+      </div>
+    </div>
+  </div>
+
 <script type="module">
 /* MediaPipe 改为「按需动态加载」：
    原先在模块顶部静态 import CDN，一旦离线或 CDN 被网络策略拦截，
@@ -10445,6 +10456,7 @@ const tongji=$("tongji"), tjStage=$("tjStage");
 const barkVideo=$("barkVideo"), barkFallback=$("barkFallback"), awayTimerEl=$("awayTimer");
 const focusVideo=$("focusVideo");
 const modalMask=$("modalMask"), loadingTip=$("loadingTip"), chapterList=$("chapterList");
+const muteMask=$("muteMask");
 
 /* ---------- 字数统计面板：拖动定位（记忆到 localStorage） ---------- */
 (function makeTongjiDraggable(){
@@ -10949,6 +10961,58 @@ function detectLoop(){
   rafId=requestAnimationFrame(detectLoop);
 }
 
+/* 需求1：立刻把 tongji 画面切到专注视频。
+   开启监测时若只依赖 1.2s 守护定时器，画面会先空一拍；这里同步完成状态与播放。 */
+function showFocusNow(){
+  try{
+    tjStage.classList.remove("barking"); tjStage.classList.add("working");
+    tongji.classList.remove("barking");
+    // 待机插画由 .monitoring 类隐藏；这里确保视频层可见、bark 层收起
+    focusVideo.style.display="block";
+    barkVideo.style.display="";
+    barkFallback.style.display="none";
+    try{ barkVideo.pause(); barkVideo.currentTime=0; }catch(e){}
+    playFocus();
+    // 元数据未就绪时 play() 会被拒，补一次监听
+    if(focusVideo.readyState<2){
+      focusVideo.addEventListener("loadeddata",()=>{ if(monitoring && !isDistracted) playFocus(); },{once:true});
+    }
+  }catch(e){}
+}
+
+/* 需求2：提醒用户打开电脑声音。
+   【重要事实】浏览器出于安全限制，**无法读取系统音量/静音状态**——没有任何 API 暴露它。
+   （实测：AudioContext 初始为 suspended；AnalyserNode 读的是音频图内部信号，
+     即使系统静音也照样有波形，因此"测电平判断静音"是无效方案。）
+   因此这里检测「真正可判定」的三种情况，任一命中就提示：
+     ① 视频元素被静音或音量为 0；
+     ② 带声播放被浏览器自动播放策略拦截（play() 被拒）→ 届时听不到狗叫；
+     ③ 系统静音无法检测，故首次开启监测时提醒一次（记在本机，不重复打扰）。 */
+const MUTE_TIP_KEY="fw_mute_tip_shown";
+async function checkMutedAndWarn(){
+  const showWarn=()=>{ try{ muteMask.classList.add("show"); }catch(e){} };
+  try{
+    // ① 元素层面静音（可靠判据）
+    if(barkVideo.muted || barkVideo.volume===0){ showWarn(); return; }
+
+    // ② 带声播放是否被拦截：静默试播一小段，被拒说明分心时也发不出声
+    let blocked=false;
+    try{
+      barkVideo.muted=false;
+      barkVideo.volume=VOL_MIN;         // 用最小音量试探，避免真的叫出来
+      await barkVideo.play();
+      barkVideo.pause(); barkVideo.currentTime=0;
+    }catch(e){ blocked=true; }
+    if(blocked){ showWarn(); return; }
+
+    // ③ 系统静音检测不到 → 首次开启时提醒一次
+    if(lsGet(MUTE_TIP_KEY)!=="1"){
+      lsSet(MUTE_TIP_KEY,"1");
+      showWarn();
+    }
+  }catch(e){ /* 检测失败不打扰用户 */ }
+}
+
 async function startMonitoring(){
   loadingTip.classList.add("show");
   try{
@@ -10975,7 +11039,11 @@ async function startMonitoring(){
     camPill.classList.add("on"); camLabel.textContent="监测中";
     loadingTip.classList.remove("show");
     awaySince=0; backSince=0; setDistracted(false);
+    // 需求1：开启瞬间就把画面切到专注视频（不等守护定时器的 1.2s 巡检）
+    showFocusNow();
     detectLoop();
+    // 需求2：授权成功后检测设备是否静音，静音则提示打开声音
+    checkMutedAndWarn();
   }catch(err){
     loadingTip.classList.remove("show");
     alert("无法开启摄像头："+(err&&err.message?err.message:err)+"\n\n"+
@@ -11067,7 +11135,7 @@ camPill.addEventListener("click",()=>{
   // 这些是本页真实可用的区域，点击不跳转
   const KEEP=[
     "#titleInput","#bodyInput",        // 输入区
-    "#camPill","#modalMask",           // 专注监测开关与授权弹层
+    "#camPill","#modalMask","#muteMask", // 专注监测开关、授权弹层、静音提醒弹层
     "#tongji",                         // 字数统计卡片（可拖动/设置视频）
     "#vsetMask","#videoFilePicker"     // 视频设置弹层与文件选择
   ].join(",");
@@ -11092,6 +11160,9 @@ camPill.addEventListener("click",()=>{
 })();
 $("modalCancel").addEventListener("click",()=>modalMask.classList.remove("show"));
 $("modalConfirm").addEventListener("click",()=>{ modalMask.classList.remove("show"); startMonitoring(); });
+/* 静音提醒弹窗：点「知道了」关闭；点遮罩空白处同样关闭 */
+$("muteOk").addEventListener("click",()=>muteMask.classList.remove("show"));
+muteMask.addEventListener("click",e=>{ if(e.target===muteMask) muteMask.classList.remove("show"); });
 window.addEventListener("beforeunload",()=>{ if(stream) stream.getTracks().forEach(t=>t.stop()); });
 
 /* 分享预览（沙箱/无来源）中改文案：浏览器不会为此类页面发放摄像头权限，
@@ -11249,6 +11320,12 @@ if(new URLSearchParams(location.search).get("debug")==="bark"){
   window.__debugSetDistracted=setDistracted;
   window.__debugDistractionState=()=>({isDistracted});
   setTimeout(()=>setDistracted(true),300);
+}
+/* 调试：?debug=cam 暴露「立即切专注」与「静音提醒」两个函数，便于无摄像头环境回归。 */
+if(new URLSearchParams(location.search).get("debug")==="cam"){
+  window.__debugShowFocusNow=showFocusNow;
+  window.__debugCheckMuted=checkMutedAndWarn;
+  window.__debugSetMonitoring=(v)=>{ monitoring=v; if(v) tjStage.classList.add("monitoring"); else tjStage.classList.remove("monitoring"); };
 }
 </script>
 </body>
