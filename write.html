@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>写作 · 作家助手</title>
+<title>狗狗督查</title>
+<link rel="stylesheet" href="shared/site-nav.css?v=14" />
+<script src="shared/site-nav.js?v=14" defer></script>
 <!-- 51.LA 基础访问统计：PV/UV、访问来源、地域与设备等。
      使用显式 HTTPS，确保 GitHub Pages 与本地 file:// 预览都能正确加载。 -->
 <script charset="UTF-8" id="LA_COLLECT" src="https://sdk.51.la/js-sdk-pro.min.js"></script>
@@ -296,7 +298,7 @@
   .btn-primary:hover{background:#0453d1;}
 </style>
 </head>
-<body>
+<body data-page-id="dog-watcher">
   <!-- ===== 顶部标题栏 ===== -->
   <div class="titlebar">
     <div class="win-dots"><i class="r"></i><i class="y"></i><i class="g"></i></div>
@@ -336,23 +338,8 @@
   <!-- ===== 主区域 ===== -->
   <div class="body-row">
     <!-- 左侧章节面板 -->
-    <aside class="leftpanel">
-      <div class="lp-search">
-        <div class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>全书</div>
-      </div>
-      <div class="lp-new">
-        <button class="primary">新建章</button>
-        <button class="ghost">新建卷</button>
-      </div>
-      <div class="lp-tabs">
-        <span class="t on">草稿</span><span class="t">已发布</span><span class="t">筛选 ▾</span>
-        <span class="more">···</span>
-      </div>
-      <div class="lp-list" id="chapterList">
-        <div class="lp-group"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16v12H4z"/><path d="M4 7l2-3h5l2 3"/></svg>作品相关<span class="cnt">1章</span></div>
-        <div class="lp-group"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v13H4z"/><path d="M4 6l1-2h6l1 2"/></svg>第一卷 小丑<span class="cnt">16章</span></div>
-      </div>
-      <!-- 章节列表由 JS 渲染，含高亮当前章 -->
+    <aside class="leftpanel" aria-label="站点目录">
+      <nav class="site-nav" aria-label="站点目录"></nav>
     </aside>
 
     <!-- 中间：正文 + 底部状态栏 -->
@@ -10459,7 +10446,7 @@ const camPreview=$("camPreview"), camVideo=$("camVideo");
 const tongji=$("tongji"), tjStage=$("tjStage");
 const barkVideo=$("barkVideo"), barkFallback=$("barkFallback"), awayTimerEl=$("awayTimer");
 const focusVideo=$("focusVideo");
-const modalMask=$("modalMask"), loadingTip=$("loadingTip"), chapterList=$("chapterList");
+const modalMask=$("modalMask"), loadingTip=$("loadingTip");
 const muteMask=$("muteMask");
 
 /* ---------- 字数统计面板：拖动定位（记忆到 localStorage） ---------- */
@@ -10612,23 +10599,7 @@ const muteMask=$("muteMask");
   });
 })();
 
-/* ---------- 左侧章节列表数据（还原 Figma 的界面演示数据） ---------- */
-const CHAPTERS=[
-  {n:"第一章 缘红",wc:2471,done:true},{n:"第二章 情况",wc:3213,done:true},
-  {n:"第三章 梅丽莎",wc:3110,done:true},{n:"第四章 占卜",wc:3816},
-  {n:"第五章 仪式",wc:3281},{n:"第六章 非凡者",wc:3359,active:true},
-  {n:"第七章 代号",wc:3258},{n:"第八章 新的时代",wc:4392},
-  {n:"第九章 笔记",wc:3818},{n:"第十章 常态",wc:3105},
-  {n:"第十一章 真正的厨艺",wc:3060},{n:"第十二章 再次上门",wc:2784},
-  {n:"第十三章 值夜者",wc:3069},{n:"第十四章 通灵者",wc:3838},
-  {n:"第十五章 邀请",wc:2745},{n:"第十六章 狗拿耗子",wc:4436},
-];
-CHAPTERS.forEach(c=>{
-  const el=document.createElement("div");
-  el.className="lp-item"+(c.done?" done":"")+(c.active?" active":"");
-  el.innerHTML=`<span class="dot"></span><span class="nm">${c.n}</span><span class="wc">${c.wc}</span>`;
-  chapterList.appendChild(el);
-});
+/* 左侧站点目录由 shared/site-nav.js 统一渲染。 */
 
 /* ---------- 持久化（需求1：浏览器缓存上次打字内容） ---------- */
 const LS={title:"fw_title",body:"fw_body"};

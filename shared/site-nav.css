@@ -1,0 +1,125 @@
+/* shared/site-nav.css —— 站点目录样式（两页共用）
+ * 仅定义 .site-nav 相关样式，靠 CSS 变量取色，颜色由宿主页面主题变量提供，
+ * 未提供时回落中性色，避免与狗狗督察 / 风吹草低各自的视觉风格冲突。 */
+.site-nav {
+  flex: 1;
+  --sn-fg: var(--ink, var(--text, #141E29));
+  --sn-fg-muted: var(--ink-49, rgba(20, 30, 41, .49));
+  --sn-fg-faint: var(--ink-34, rgba(20, 30, 41, .34));
+  --sn-accent: var(--brand, var(--primary, #2E6650));
+  --sn-accent-weak: var(--brand-weak, var(--selected-bg, rgba(46, 102, 80, .15)));
+  --sn-hover: var(--ink-04, rgba(20, 30, 41, .05));
+  --sn-line: var(--line, rgba(20, 30, 41, .10));
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.site-nav-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  margin: 12px 12px 8px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: var(--sn-hover);
+  color: var(--sn-fg-muted);
+  flex: 0 0 auto;
+}
+.site-nav-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  font-size: 14px;
+  color: var(--sn-fg);
+}
+.site-nav-search input::placeholder { color: var(--sn-fg-faint); }
+.sn-search-icon {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  border: 1.6px solid currentColor;
+  border-radius: 50%;
+  position: relative;
+  opacity: .8;
+}
+.sn-search-icon::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  bottom: -2px;
+  width: 5px;
+  height: 1.6px;
+  background: currentColor;
+  transform: rotate(45deg);
+  transform-origin: left center;
+}
+
+.site-nav-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 4px 12px;
+  scrollbar-width: thin;
+}
+
+.site-nav-folder-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: var(--sn-fg);
+  font-size: 13px;
+  font-weight: 500;
+}
+.site-nav-folder-head:hover { background: var(--sn-hover); border-radius: 7px; }
+.sn-caret {
+  width: 0;
+  height: 0;
+  flex: 0 0 auto;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--sn-fg-muted);
+  transform: rotate(-90deg);
+  transition: transform .15s ease;
+}
+.site-nav-folder.open > .site-nav-folder-head .sn-caret { transform: rotate(0deg); }
+
+.site-nav-folder-body {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height .2s ease;
+}
+.site-nav-folder.open > .site-nav-folder-body { max-height: 80vh; }
+
+.site-nav-item {
+  display: block;
+  height: 30px;
+  padding: 0 10px 0 28px;
+  border-radius: 7px;
+  margin: 1px 4px;
+  line-height: 30px;
+  color: var(--sn-fg);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.site-nav-item:hover { background: var(--sn-hover); }
+.site-nav-item.active {
+  background: var(--sn-accent-weak);
+  color: var(--sn-fg);
+  font-weight: 500;
+}
+.site-nav-item[hidden] { display: none; }

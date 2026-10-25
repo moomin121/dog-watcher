@@ -14,6 +14,16 @@
 
 摄像头画面只在本机处理，不上传。
 
+## 站点目录
+
+两个页面共用 `shared/site-nav.js` 与 `shared/site-nav.css`。新增页面时：
+
+1. 将页面放到站点目录内，并在 `<body>` 设置唯一 `data-page-id`。
+2. 在 `shared/site-nav.js` 的 `SITE_NAV.folders[].items` 增加 `{ id, title, href }`。
+3. 页面引入相对路径正确的共享 CSS/JS；运行 `node tests/site-smoke.cjs`。
+
+目录链接以站点根为基准，适用于本地预览和 `/dog-watcher/` GitHub Pages 子路径。
+
 ## 说明
 
 - 单个 HTML 文件，视频与插画均已内嵌，无需其他依赖

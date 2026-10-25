@@ -1,0 +1,26 @@
+:root {
+  /* 皮肤分区（对应设计稿标注） */
+  --solid-1: #EDF0D5;            /* 实色背景1：工具栏 / 活动标签 / 统计面板 */
+  --solid-2: #DCE6C4;            /* 实色背景2：顶栏标签条 */
+  --translucent: rgba(240, 243, 220, 0.78);  /* 背景半透：左右侧栏 */
+  --translucent-light: rgba(249, 250, 240, 0.66); /* 背景半透：编辑区状态栏 */
+  --primary: #2E6650;
+  --primary-hover: #245440;
+  --on-primary: #FAFBEF;
+  --text: #293C32;
+  --muted: rgba(41, 60, 50, 0.68);
+  --faint: rgba(41, 60, 50, 0.44);
+  --border: rgba(20, 30, 41, 0.10);
+  --border-soft: rgba(20, 30, 41, 0.06);
+  --field-bg: rgba(20, 30, 41, 0.045);
+  --hover-bg: rgba(20, 30, 41, 0.05);
+  --selected-bg: rgba(46, 102, 80, 0.15);
+  --selection: #C9DBA7;
+  --visual-bg: #ADF0B8;          /* 统计面板可替换视觉元素底色 */
+  --wallpaper-fallback: #EDF0C8;
+  --wallpaper-position: left bottom;  /* 壁纸贴左下：露出草帽人物，草地区域承托正文 */
+  --wallpaper-zoom: 1;                /* 1 = 完整画面，不裁切 */
+  --body-size: 18px;
+  --font-ui: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --font-editor: "LXGW WenKai GB", "LXGW WenKai", "Kaiti SC", "STKaiti", "Songti SC", serif;
+}

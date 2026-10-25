@@ -1,0 +1,41 @@
+{
+  "name": "风过晴野",
+  "id": "sunny-meadow",
+  "version": "2.0",
+  "design": "https://www.figma.com/design/QI1tKb57A7agNlbfQwVz6Q/Untitled?node-id=128-8795",
+  "zones": {
+    "titlebar": { "type": "solid", "token": "solid-2", "color": "#DCE6C4", "note": "实色背景2" },
+    "toolbar": { "type": "solid", "token": "solid-1", "color": "#EDF0D5", "note": "实色背景1" },
+    "activeTab": { "type": "solid", "token": "solid-1", "color": "#EDF0D5", "note": "实色背景1" },
+    "sidebar": { "type": "translucent", "token": "translucent", "color": "rgba(240,243,220,0.78)", "blur": 16, "note": "背景半透" },
+    "rail": { "type": "translucent", "token": "translucent", "color": "rgba(240,243,220,0.78)", "blur": 16, "note": "背景半透" },
+    "editorStatusbar": { "type": "translucent", "token": "translucent-light", "color": "rgba(249,250,240,0.66)", "blur": 12, "note": "背景半透" },
+    "editor": { "type": "transparent", "note": "直接透出壁纸" },
+    "statsPanel": { "type": "solid", "token": "solid-1", "color": "#EDF0D5", "note": "实色背景1" }
+  },
+  "replaceableVisuals": [
+    {
+      "id": "stats-visual",
+      "file": "assets/icons/stats-visual.gif",
+      "zone": "statsPanel",
+      "size": "高度 80px，宽度按比例，居中显示",
+      "fallbackColor": "transparent",
+      "note": "字数统计面板顶部的可替换视觉元素，支持 GIF 动图，无背景色"
+    },
+    {
+      "id": "wallpaper",
+      "file": "assets/wallpaper.png",
+      "zone": "editor",
+      "note": "正文区壁纸，由 GIF（裙摆/衣袖/草地逐帧运动）经 scripts/build_motion.py 生成的位移场驱动，位置可通过皮肤设置调整"
+    }
+  ],
+  "tokens": {
+    "primary": "#2E6650",
+    "text": "#293C32",
+    "selection": "#C9DBA7",
+    "visualBg": "#ADF0B8"
+  },
+  "typography": {
+    "editor": "LXGW WenKai GB / Kaiti SC，标题 28px/36px Bold，正文 20px/36px Bold"
+  }
+}
