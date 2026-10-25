@@ -30,6 +30,10 @@ for (const page of pages) {
 }
 
 const meadow = source('themes/meadow/index.html');
+assert.match(meadow, /id="backgroundStatus" role="status"/);
+assert.match(meadow, /wind\.js\?v=15/);
+assert.match(source('themes/meadow/wind.js'), /背景已就绪 · 在正文输入后启动动画/);
+assert.match(source('themes/meadow/wind.js'), /!document\.hidden && motion\.active/);
 assert.match(meadow, /assets\/stats-visual\.gif/);
 assert.ok(exists('themes/meadow/assets/stats-visual.gif'));
 const assetRefs = [...meadow.matchAll(/(?:src|href)=["']([^"'#?]+)["']/g)].map((m) => m[1]);

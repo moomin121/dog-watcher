@@ -11,7 +11,7 @@
   <script src="stats.js?v=13" defer></script>
   <script src="app.js?v=13" defer></script>
   <script src="wind-model.js?v=13" defer></script>
-  <script src="wind.js?v=13" defer></script>
+  <script src="wind.js?v=15" defer></script>
   <script src="../../shared/site-nav.js?v=14" defer></script>
 </head>
 <body data-page-id="meadow">
@@ -78,6 +78,7 @@
         </main>
         <footer class="statusbar" aria-label="编辑区状态栏">
           <button class="status-new" type="button"><img class="ic" src="assets/icons/icon-plus.svg" alt="">新建章节</button>
+          <span id="backgroundStatus" role="status" style="font-size:12px;color:var(--muted)">背景视频加载中…</span>
           <span class="status-plan"><img class="ic" src="assets/icons/status-icon-progress.svg" alt="">计划: 剩<b>700</b></span>
           <span class="status-right"><span class="pair">纠错：<b>5</b></span><span class="divider-v" aria-hidden="true"></span><span class="pair">本章：<b id="footerCount">189</b><img class="ic" src="assets/icons/status-icon-triangle-up.svg" alt=""></span></span>
         </footer>
