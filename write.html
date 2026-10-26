@@ -396,22 +396,20 @@
       <img class="idle" id="idleArt" alt="" />
     </div>
 
-    <!-- 默认视频压缩后内嵌：WorkBuddy 分享只传单个 HTML，也能完整播放，不依赖 assets/。 -->
-
-
+    <!-- 默认媒体已拆分到 assets/dog/，以普通 URL 引用，避免大段 base64 内嵌拖慢首屏。 -->
     <script>
       (()=>{
         const defaults=Object.freeze({focus:"assets/dog/focus.mp4",bark:"assets/dog/bark.mp4"});
         window.__DEFAULT_VIDEO_URLS=defaults;
-        // 待机插画（未开启专注监测时显示）同样内嵌，保证单文件分享可用
+        // 待机插画（未开启专注监测时显示）同样外链，按需由浏览器加载。
         try{
           const idle=document.getElementById("idleArt");
           if(idle) idle.src="assets/dog/idle.gif";
         }catch(e){}
         const focus=document.getElementById("focusVideo"),bark=document.getElementById("barkVideo");
         focus.muted=true; focus.src=defaults.focus; bark.src=defaults.bark;
-        focus.preload="none"; bark.preload="none";
-
+        try{ focus.load(); bark.load(); }catch(e){}
+        const p=focus.play(); if(p&&p.catch) p.catch(()=>{});
       })();
     </script>
     <!-- 正常：统计 -->

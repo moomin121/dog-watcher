@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#DCEEF4">
+  <title>通向海边 · 动态码字主题</title>
+  <link rel="stylesheet" href="theme.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=10">
+  <script src="stats.js?v=3" defer></script>
+  <script src="app.js?v=8" defer></script>
+  <script type="module" src="motion.js?v=17"></script>
+  <link rel="stylesheet" href="../../shared/site-nav.css?v=14">
+  <script src="../../shared/site-nav.js?v=14" defer></script>
+  <link rel="stylesheet" href="../../shared/page-loading.css?v=16">
+  <script src="../../shared/page-loading.js?v=16" defer></script>
+</head>
+<body data-page-id="coastal-road">
+  <div id="pageLoading" role="status" aria-label="页面加载中"><span class="loading-spinner"></span>正在准备编辑器…</div>
+  <div class="wallpaper" aria-hidden="true"></div>
+  <canvas id="coastalCanvas" class="coastal-canvas" aria-hidden="true" hidden></canvas>
+  <video id="wallpaperVideo" class="wallpaper-video" muted loop playsinline preload="metadata" aria-hidden="true" hidden></video>
+  <div class="app" aria-label="作家助手写作界面 · 海风长路皮肤预览">
+    <header class="titlebar">
+      <div class="tabs">
+        <span class="tab tab-work"><img class="ic" src="assets/icons/tabs-icon-workbench.svg" alt="">工作台</span>
+        <span class="tab tab-book active"><img class="ic" src="assets/icons/tabs-icon-book.svg" alt="">诡秘之主<img class="ic tab-close" src="assets/icons/icon-close-m.svg" alt=""></span>
+        <span class="tab tab-web"><img class="ic" src="assets/icons/tabs-icon-web.svg" alt="">诡秘之主小说<img class="ic tab-close" src="assets/icons/icon-close-m.svg" alt=""></span>
+        <span class="tab tab-more"><img class="ic" src="assets/icons/icon-chevron-down.svg" alt=""></span>
+      </div>
+      <div class="titlebar-right">
+        <span class="sync-state"><time id="clock"></time><span id="saveState">本地预览</span></span>
+        <span class="divider-v" aria-hidden="true"></span>
+        <button class="circle-btn" type="button" title="同步" aria-label="同步"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.2 8a5.2 5.2 0 1 1-1.6-3.75M13.2 1.8v3h-3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        <button class="circle-btn" type="button" title="设置" aria-label="设置"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.1" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.8v2m0 8.4v2M1.8 8h2m8.4 0h2M3.6 3.6 5 5m6 6 1.4 1.4M12.4 3.6 11 5m-6 6-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        <span class="win-btns" aria-hidden="true">
+          <svg viewBox="0 0 10 10"><path d="M1 5h8" stroke="currentColor" stroke-width="1"/></svg>
+          <svg viewBox="0 0 10 10"><rect x="1.5" y="1.5" width="7" height="7" fill="none" stroke="currentColor" stroke-width="1"/></svg>
+          <svg viewBox="0 0 10 10"><path d="m1.5 1.5 7 7m0-7-7 7" stroke="currentColor" stroke-width="1"/></svg>
+        </span>
+      </div>
+    </header>
+    <nav class="toolbar" aria-label="写作工具栏">
+      <div class="tool-group">
+        <button id="fontButton" type="button" title="调整正文字号"><img class="ic" src="assets/icons/toolbar-icon-font.svg" alt=""><span>字体</span></button>
+        <button id="themeButton" type="button"><img class="ic" src="assets/icons/toolbar-icon-skin.svg" alt=""><span>背景</span></button>
+        <span class="v-divider" aria-hidden="true"></span>
+        <button id="undoButton" type="button" class="icon-btn" title="撤销" aria-label="撤销"><img class="ic" src="assets/icons/toolbar-icon-undo.svg" alt=""></button>
+        <button id="redoButton" type="button" class="icon-btn" title="重做" aria-label="重做"><img class="ic" src="assets/icons/toolbar-icon-redo.svg" alt=""></button>
+        <button id="formatButton" type="button"><img class="ic" src="assets/icons/toolbar-icon-format.svg" alt=""><span>一键排版</span></button>
+        <button id="insertButton" type="button"><img class="ic" src="assets/icons/toolbar-icon-insert.svg" alt=""><span>插入</span></button>
+      </div>
+      <div class="tool-group">
+        <button id="fullscreenButton" type="button" class="secondary-tool"><img class="ic" src="assets/icons/toolbar-icon-fullscreen.svg" alt=""><span>全屏</span></button>
+        <button id="focusButton" type="button" aria-pressed="false"><img class="ic" src="assets/icons/toolbar-icon-closedoor.svg" alt=""><span>闭关</span></button>
+        <span class="v-divider" aria-hidden="true"></span>
+        <button id="findButton" type="button"><img class="ic" src="assets/icons/toolbar-icon-find.svg" alt=""><span>查找替换</span></button>
+        <button id="nameButton" type="button"><img class="ic" src="assets/icons/toolbar-icon-name.svg" alt=""><span>取名</span></button>
+        <button id="painterButton" type="button" class="secondary-tool"><img class="ic" src="assets/icons/toolbar-icon-aiimg.svg" alt=""><span>画师</span></button>
+        <button id="historyButton" type="button" class="secondary-tool"><img class="ic" src="assets/icons/toolbar-icon-history.svg" alt=""><span>历史</span></button>
+        <button id="exportButton" type="button" class="publish"><span>发布</span></button>
+      </div>
+    </nav>
+    <div class="main">
+      <button class="drag-handle" id="sidebarHandle" type="button" aria-label="收起或调整目录宽度" aria-expanded="true" title="拖动调整宽度，点击收起/展开">
+        <svg viewBox="0 0 8 12" aria-hidden="true"><path d="M6.5 1 2 6l4.5 5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <aside class="sidebar" aria-label="站点目录">
+        <nav class="site-nav" aria-label="站点目录"></nav>
+      </aside>
+      <section class="center">
+        <main class="editor" id="editorScroll" aria-label="正文编辑区">
+          <div class="paper">
+            <div class="chapter-kicker"><span>第六章</span><span class="kicker-line"></span><span>SUMMER NOTES</span></div>
+            <input class="title-input" id="titleInput" aria-label="章节标题" value="通向海边" spellcheck="false">
+            <div class="chapter-divider" aria-hidden="true"></div>
+            <textarea class="body-input" id="bodyInput" aria-label="章节正文" spellcheck="false">另一个调试中的动态码字主题，这个是纯代码写的背景动画</textarea>
+            <div class="end-mark" aria-hidden="true">·　·　·</div>
+          </div>
+        </main>
+        <footer class="statusbar" aria-label="编辑区状态栏">
+          <button class="status-new" type="button"><img class="ic" src="assets/icons/icon-plus.svg" alt="">新建章节</button>
+          <span class="status-plan"><img class="ic" src="assets/icons/status-icon-progress.svg" alt="">计划: 剩<b>700</b></span>
+          <span class="status-right"><span class="pair">纠错：<b>5</b></span><span class="divider-v" aria-hidden="true"></span><span class="pair">本章：<b id="footerCount">189</b><img class="ic" src="assets/icons/status-icon-triangle-up.svg" alt=""></span></span>
+        </footer>
+      </section>
+      <aside class="rail" aria-label="辅助工具">
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-proofread.svg" alt=""><span>校对</span></div>
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-spell.svg" alt=""><span>拼字</span></div>
+        <span class="rail-divider" aria-hidden="true"></span>
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-outline.svg" alt=""><span>大纲</span></div>
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-character.svg" alt=""><span>角色</span></div>
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-storysetting.svg" alt=""><span>设定</span></div>
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-note.svg" alt=""><span>灵感</span></div>
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-book.svg" alt=""><span>双栏</span></div>
+        <span class="rail-divider" aria-hidden="true"></span>
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-miaobi.svg" alt=""><span>妙笔</span></div>
+      </aside>
+    </div>
+    <aside class="stats" id="statsPanel" aria-label="字数统计">
+      <div class="stats-head"><span>字数统计</span><button id="statsClose" type="button" aria-label="关闭字数统计">×</button></div>
+      <figure class="stats-visual" aria-label="可替换的视觉元素"><img src="assets/icons/stats-visual.gif" alt="统计面板插画（可替换的视觉元素，支持 GIF）"></figure>
+      <div class="stat-rows">
+        <div><span>本章字数</span><b id="statChapter">0</b></div>
+        <div><span>码字速率(字/分)</span><b id="statSpeed">0</b></div>
+        <div><span>码字时间</span><b id="statActive">00:00:00</b></div>
+        <div><span>空闲时间</span><b id="statIdle">00:00:00</b></div>
+      </div>
+    </aside>
+  </div>
+  <dialog id="themeDialog" class="theme-dialog" aria-labelledby="themeTitle">
+    <div class="dialog-head"><div><span class="eyebrow">WRITING SKIN / 04</span><h2 id="themeTitle">海风长路</h2></div><button id="closeTheme" class="close-button" aria-label="关闭皮肤设置">×</button></div>
+    <img class="theme-preview" src="assets/first-frame.png" alt="浅蓝海岸、柔和田野与中下方公路">
+    <p>壁纸从正文区透出，左右侧栏半透明悬浮，顶栏与工具栏保持实色。</p>
+    <div class="palette" aria-label="皮肤分区配色">
+      <span style="--swatch:#DCEEF4" title="实色背景2 · 顶栏"></span>
+      <span style="--swatch:#EEF7F5" title="实色背景1 · 工具栏 / 统计面板"></span>
+      <span style="--swatch:rgba(239,247,247,.82)" title="背景半透 · 左右侧栏"></span>
+      <span style="--swatch:#176A78" title="主色"></span>
+      <span style="--swatch:#183746" title="正文"></span>
+      <span style="--swatch:#D6F0E5" title="统计视觉元素底色"></span>
+    </div>
+    <label class="select-row">背景固定位置<select id="anchorSelect"><option value="center bottom" selected>中下 · 推荐</option><option value="left bottom">左下</option><option value="center">居中 · 裁切</option><option value="left top">左上</option><option value="right top">右上</option><option value="right bottom">右下</option></select></label>
+    <label class="select-row">正文字号<select id="fontSelect"><option value="15">15 px</option><option value="16">16 px</option><option value="18" selected>18 px</option><option value="20">20 px</option><option value="22">22 px</option></select></label>
+    <fieldset class="atmosphere">
+      <legend>动态壁纸 · 海风长路</legend>
+      <label class="select-row">壁纸模式<select id="motionMode"><option value="builtin" selected>内置动态 · 海岸前行</option><option value="video">本地视频</option><option value="static">静态壁纸</option></select></label>
+      <div class="video-actions" id="localVideoControls" hidden><button id="chooseVideo" type="button" class="btn-primary">选择本地视频</button><button id="clearVideo" type="button" class="btn-ghost" disabled>移除视频</button></div>
+      <input type="file" id="videoFile" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" hidden>
+      <p class="atmosphere-hint" id="videoStatus" role="status">正在准备海岸景物…</p>
+      <label class="switch-row"><span>启用动画<span class="switch-hint">跟随打字 · 停笔静止</span></span><input type="checkbox" id="motionToggle" checked></label>
+      <div class="preview-actions"><button id="previewMotion" class="btn-primary" type="button" aria-pressed="false">连续预览</button><button id="resetMotion" class="btn-ghost" type="button">恢复舒缓默认值</button></div>
+      <p class="atmosphere-hint">关闭背景设置后，恢复跟随打字。调节值自动保存在本机。</p>
+      <div id="builtinSettings">
+      <details class="motion-group"><summary>云层</summary>
+        <p>保留原画云群，缓缓向两侧涌动；正文周围的位移平滑减到零。</p>
+        <label class="switch-row"><span>云层运动</span><input id="cloudsToggle" type="checkbox" checked></label>
+        <label class="range-row" for="cloudSpeed"><span>云向外漂移速度</span><output id="cloudSpeedValue" for="cloudSpeed">120 像素/秒</output><input id="cloudSpeed" type="range" min="0" max="120" step="1" value="120"></label>
+        <label class="range-row" for="cloudFloat"><span>云上下浮动幅度</span><output id="cloudFloatValue" for="cloudFloat">10 像素</output><input id="cloudFloat" type="range" min="0" max="24" step="1" value="10"></label>
+        <label class="range-row" for="cloudRandom"><span>云运动随机程度</span><output id="cloudRandomValue" for="cloudRandom">91 %</output><input id="cloudRandom" type="range" min="0" max="100" step="1" value="91"></label>
+        <label class="range-row" for="cloudOpacity"><span>云流动强度</span><output id="cloudOpacityValue" for="cloudOpacity">85 %</output><input id="cloudOpacity" type="range" min="0" max="100" step="1" value="85"></label>
+      </details>
+      <details class="motion-group"><summary>行驶</summary>
+        <label class="switch-row"><span>沿路前进</span><input id="roadToggle" type="checkbox" checked></label>
+        <label class="range-row" for="roadSpeed"><span>道路前进速度</span><output id="roadSpeedValue" for="roadSpeed">20 %</output><input id="roadSpeed" type="range" min="0" max="40" step="1" value="20"></label>
+        <label class="range-row" for="edgeWidth"><span>左右边缘动效宽度</span><output id="edgeWidthValue" for="edgeWidth">14 %</output><input id="edgeWidth" type="range" min="8" max="22" step="1" value="14"></label>
+        <label class="range-row" for="bottomHeight"><span>底部动效高度</span><output id="bottomHeightValue" for="bottomHeight">20 %</output><input id="bottomHeight" type="range" min="10" max="25" step="1" value="20"></label>
+        <label class="switch-row"><span>海浪拍岸</span><input id="shoreToggle" type="checkbox"></label>
+        <p>开启后海湾的浪缓缓拍打岸边（约 5 秒一个循环）；正文后面的浪停在固定位置。</p>
+      </details>
+      </div>
+      <details class="motion-group"><summary>阅读保护</summary>
+        <label class="range-row" for="caretAnchor"><span>光标自动滚屏位置</span><output id="caretAnchorValue" for="caretAnchor">65 %</output><input id="caretAnchor" type="range" min="35" max="85" step="1" value="65"></label>
+        <p>输入区占满整个编辑区高度，光标越过设定位置（默认 65%）时才自动滚屏。正文及两侧安全距离内的背景静止；滚屏暂停动效，下次输入后继续。</p>
+      </details>
+      <div class="keyframe-links"><a href="assets/first-frame.png" download>下载首帧</a><a href="assets/last-frame.png" download>下载尾帧</a><a href="generation-prompt.txt" download>即梦提示词</a></div>
+    </fieldset>
+    <div class="dialog-links"><a href="assets/first-frame.png" target="_blank" rel="noopener">查看完整壁纸 ↗</a><a href="skin.json" download>下载皮肤配置 ↓</a></div>
+  </dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <span id="fontStatus" hidden></span>
+</body>
+</html>

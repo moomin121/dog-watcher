@@ -1,0 +1,192 @@
+{
+  "name": "海风长路",
+  "id": "coastal-road-motion",
+  "version": "5.1",
+  "design": "https://www.figma.com/design/QI1tKb57A7agNlbfQwVz6Q/Untitled?node-id=128-8795",
+  "sourceImage": "用户原始海岸公路插画，以 imagegen 重新创作连贯横幅构图；公路位于中下方",
+  "zones": {
+    "titlebar": {
+      "type": "solid",
+      "token": "solid-2",
+      "color": "#DCEEF4"
+    },
+    "toolbar": {
+      "type": "solid",
+      "token": "solid-1",
+      "color": "#EEF7F5"
+    },
+    "activeTab": {
+      "type": "solid",
+      "token": "solid-1",
+      "color": "#EEF7F5"
+    },
+    "sidebar": {
+      "type": "translucent",
+      "token": "translucent",
+      "color": "rgba(239,247,247,0.82)",
+      "blur": 16
+    },
+    "rail": {
+      "type": "translucent",
+      "token": "translucent",
+      "color": "rgba(239,247,247,0.82)",
+      "blur": 16
+    },
+    "editorStatusbar": {
+      "type": "translucent",
+      "token": "translucent-light",
+      "color": "rgba(247,250,248,0.72)",
+      "blur": 12
+    },
+    "editor": {
+      "type": "transparent",
+      "note": "文字直接显示在壁纸上"
+    },
+    "statsPanel": {
+      "type": "solid",
+      "token": "solid-1",
+      "color": "#EEF7F5"
+    }
+  },
+  "wallpaper": {
+    "file": "assets/first-frame.png",
+    "fit": "cover",
+    "anchor": "center bottom",
+    "zoom": 1,
+    "note": "使用 imagegen 直接调整图片本身的色彩与明暗；低饱和浅蓝海面、浅鼠尾草绿田野，公路保持正下方居中，正文仍直接写在壁纸上",
+    "width": 1672,
+    "height": 941
+  },
+  "tokens": {
+    "primary": "#176A78",
+    "primaryHover": "#0D5665",
+    "onPrimary": "#FFFFFF",
+    "text": "#183746",
+    "selection": "#B9E9E3",
+    "visualBg": "#D6F0E5"
+  },
+  "statsVisual": {
+    "file": "assets/icons/stats-visual.gif",
+    "optional": true,
+    "note": "保留原编辑器统计小面板及可替换视觉位置"
+  },
+  "effects": {
+    "typing": "实际输入触发，200ms启动，400ms内停笔静止；滚屏和后台暂停，新的输入恢复",
+    "wallpaperAnimation": "coastal-scene.js",
+    "cloudDrift": "独立云团按深度透视从小变大，越近向两侧移出越快；远端淡入，画外回收；正文保护区为静止晴空，无固定云影"
+  },
+  "typography": {
+    "body": "18px / 2.2",
+    "font": "系统中文无衬线",
+    "caretAnchor": "50%",
+    "caretAnchorNote": "按完整编辑区高度的50%开始滚屏；正文滚动窗口下沿70%，背景在正文和48px安全距离内完全冻结"
+  },
+  "generation": {
+    "tool": "built-in imagegen",
+    "prompt": "docs/asset-prompts.json",
+    "reference": "assets/first-frame.png",
+    "cloudPrompt": "docs/cloud-prompts.json"
+  },
+  "uiReference": "../sunny-meadow/index.html",
+  "motion": {
+    "source": "local Three.js 2.5D scene",
+    "entry": "coastal-scene.js",
+    "defaultMode": "builtin",
+    "modes": [
+      "builtin",
+      "video",
+      "static"
+    ],
+    "triggers": [
+      "typing",
+      "temporary-panel-preview"
+    ],
+    "defaultTrigger": "typing",
+    "typingHoldMs": 400,
+    "loop": true,
+    "cycleSeconds": 30,
+    "muted": true,
+    "maxFPS": 30,
+    "maxRenderPixels": 1800000,
+    "fit": "cover",
+    "anchor": "center bottom",
+    "fixedCamera": true,
+    "ready": true,
+    "assets": [
+      "assets/clear-sky.png",
+      "assets/distant-plate.png",
+      "assets/cloud-atlas.png",
+      "assets/roadside-atlas.png",
+      "assets/field-texture.png"
+    ],
+    "reducedMotion": "static",
+    "note": "固定视角，低速沿路前行；独立云层缓慢向外漂浮。仅输入时推进，正文保护区像素冻结。参数保持时钟位置，本机保存。",
+    "rampUpMs": 200,
+    "defaultRoadSpeedPercent": 20,
+    "cloudCycleSeconds": 120,
+    "settingsStorageKey": "writing-skin:coastal-road-motion:motion:v4",
+    "readingProtection": {
+      "viewportBottomPercent": 70,
+      "caretAnchorPercent": 50,
+      "safeMarginPx": "48px at 1920px width; scales down with viewport",
+      "outerFeatherPx": "20–100px, scaled to viewport"
+    },
+    "controls": {
+      "cloudSpeed": [
+        0,
+        12,
+        4
+      ],
+      "cloudFloat": [
+        0,
+        24,
+        10
+      ],
+      "cloudRandom": [
+        0,
+        100,
+        45
+      ],
+      "cloudOpacity": [
+        0,
+        100,
+        85
+      ],
+      "roadSpeed": [
+        0,
+        40,
+        20
+      ],
+      "edgeWidth": [
+        8,
+        22,
+        14
+      ],
+      "bottomHeight": [
+        10,
+        25,
+        20
+      ],
+      "caretAnchor": [
+        35,
+        60,
+        50
+      ]
+    },
+    "settingsPanel": "原位置居中弹窗，点击背景打开",
+    "cloudProjection": {
+      "farDepth": 12,
+      "nearDepth": 1.2,
+      "count": 24,
+      "scale": "worldWidth / depth",
+      "travel": "left and right outward, increasing perspective speed"
+    },
+    "defaultCloudSpeed": 120,
+    "defaultCloudFloatPx": 10,
+    "defaultCloudRandomPercent": 91,
+    "defaultCloudFlowPercent": 85,
+    "defaultCaretAnchorPercent": 65,
+    "shoreline": "海浪拍岸开关（默认关闭）：泡沫线随潮位进出、近岸亮带涨落（5 秒往复，30s 场景周期 1/6，精确循环）；正文保护区内取冻结相位",
+    "shorelineDefault": false
+  }
+}

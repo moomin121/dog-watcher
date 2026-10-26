@@ -23,7 +23,8 @@
         label: '码字主题',
         defaultOpen: true,
         items: [
-          { id: 'meadow', title: '风吹草低', href: 'themes/meadow/' }
+          { id: 'meadow', title: '风吹草低', href: 'themes/meadow/' },
+          { id: 'coastal-road', title: '通向海边', href: 'themes/coastal-road/' }
         ]
       },
       {

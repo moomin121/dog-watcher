@@ -4,6 +4,7 @@
 
 - `write.html`：狗狗督查页面。
 - `themes/meadow/`：风吹草低视频写作主题。
+- `themes/coastal-road/`：通向海边，代码驱动的海岸动态写作主题；独立 URL，只加载当前页资源，复用 shared 目录。正文草稿独立存储于 `writing-skin:coastal-road-pages:v1`。
 - `shared/site-nav.js`：唯一目录配置与渲染器；新增页面优先只改这里。
 - `shared/site-nav.css`：两个页面共用的目录样式。
 - `tests/site-smoke.cjs`：发布前静态冒烟测试。

@@ -7,7 +7,8 @@ const ROOT = path.resolve(__dirname, '..');
 const nav = require(path.join(ROOT, 'shared/site-nav.js'));
 const pages = [
   { file: 'write.html', id: 'dog-watcher', shared: 'shared/site-nav.js' },
-  { file: 'themes/meadow/index.html', id: 'meadow', shared: '../../shared/site-nav.js' }
+  { file: 'themes/meadow/index.html', id: 'meadow', shared: '../../shared/site-nav.js' },
+  { file: 'themes/coastal-road/index.html', id: 'coastal-road', shared: '../../shared/site-nav.js' }
 ];
 const local = (p) => path.join(ROOT, p);
 const exists = (p) => fs.existsSync(local(p));
@@ -15,7 +16,7 @@ const source = (p) => fs.readFileSync(local(p), 'utf8');
 
 assert.equal(nav.folders.length, 2);
 assert.deepEqual(nav.folders.map((f) => f.label), ['码字主题', '其他']);
-assert.deepEqual(nav.folders.flatMap((f) => f.items.map((i) => i.title)), ['风吹草低', '狗狗督查']);
+assert.deepEqual(nav.folders.flatMap((f) => f.items.map((i) => i.title)), ['风吹草低', '通向海边', '狗狗督查']);
 for (const folder of nav.folders) for (const item of folder.items) {
   assert.match(item.href, /^(?:[a-z0-9_-]+\/)*[a-z0-9_-]+\/$|^[a-z0-9_-]+\.html$/i);
   assert.ok(exists(item.href.replace(/\/$/, '/index.html')), `missing route: ${item.href}`);
@@ -26,7 +27,7 @@ for (const page of pages) {
   assert.match(html, new RegExp(`<body[^>]*data-page-id=["']${page.id}["']`));
   assert.match(html, new RegExp(`(?:href|src)=["']${page.shared.replaceAll('/', '\\/')}\\?v=14["']`));
   assert.match(html, /class=["']site-nav["']/);
-  assert.match(html, new RegExp(`<title>[^<]*(?:${page.id === 'meadow' ? '风吹草低' : '狗狗督查'})`));
+  assert.match(html, new RegExp(`<title>[^<]*(?:${page.id === 'meadow' ? '风吹草低' : page.id === 'coastal-road' ? '通向海边' : '狗狗督查'})`));
 }
 
 const meadow = source('themes/meadow/index.html');
@@ -92,6 +93,7 @@ function navUrls(pagePath) {
 }
 const expected = [
   'https://moomin121.github.io/dog-watcher/themes/meadow/',
+  'https://moomin121.github.io/dog-watcher/themes/coastal-road/',
   'https://moomin121.github.io/dog-watcher/write.html'
 ];
 for (const page of pages) assert.deepEqual(navUrls(page.file), expected);
@@ -100,3 +102,12 @@ console.log('PASS: shared navigation config and routes');
 console.log('PASS: both pages mount the same navigation and page ids');
 console.log('PASS: meadow local assets and JavaScript syntax');
 console.log('PASS: GitHub Pages root URL resolution from both page depths');
+
+const coastal = source('themes/coastal-road/index.html');
+assert.match(coastal, /value="通向海边"/);
+assert.match(coastal, /另一个调试中的动态码字主题，这个是纯代码写的背景动画<\/textarea>/);
+assert.match(source('themes/coastal-road/app.js'), /coastal-road-pages:v1/);
+for (const ref of [...coastal.matchAll(/(?:src|href)=["']([^"'#?]+)(?:\?[^"']*)?["']/g)].map(m=>m[1]).filter(x=>!/^https?:/.test(x))) {
+  assert.ok(fs.existsSync(path.resolve(local('themes/coastal-road'),ref)), `missing coastal asset: ${ref}`);
+}
+console.log('PASS: coastal independent route, presets and all HTML asset references');

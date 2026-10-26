@@ -1,0 +1,32 @@
+:root {
+  /* 海岸晴空：实色顶栏与半透明侧栏；正文直接呈现在壁纸上。 */
+  --solid-1: #EEF7F5;
+  --solid-2: #DCEEF4;
+  --translucent: rgba(239, 247, 247, 0.82);
+  --translucent-light: rgba(247, 250, 248, 0.72);
+  --primary: #176A78;
+  --primary-hover: #0D5665;
+  --on-primary: #FFFFFF;
+  --text: #183746;
+  --muted: rgba(24, 55, 70, 0.72);
+  --faint: rgba(24, 55, 70, 0.48);
+  --border: rgba(24, 55, 70, 0.12);
+  --border-soft: rgba(24, 55, 70, 0.07);
+  --field-bg: rgba(24, 55, 70, 0.045);
+  --hover-bg: rgba(24, 55, 70, 0.06);
+  --selected-bg: rgba(23, 106, 120, 0.15);
+  --selection: #B9E9E3;
+  --visual-bg: #D6F0E5;
+  --wallpaper-fallback: #CBEAF6;
+  --wallpaper-position: center bottom;
+  --wallpaper-zoom: 1;
+  /* 打字锚点：光标所在行被固定在编辑区可视高度的这个比例（0~1）。
+     .5 让正文始终落在静止的天空/海面一侧。 */
+  --caret-anchor: .65;
+  /* 编辑区底部留白：锚点线以下的整块高度让给会动的田野公路，正文不会伸进去。
+     （编辑区高度 = 100dvh - 顶栏 40 - 工具栏 48 - 状态栏 24） */
+  --editor-bottom-reserve: max(80px, calc((1 - var(--caret-anchor)) * (100dvh - 112px)));
+  --body-size: 18px;
+  --font-ui: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --font-editor: "LXGW WenKai GB", "LXGW WenKai", "Kaiti SC", "STKaiti", "Songti SC", serif;
+}
