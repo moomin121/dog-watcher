@@ -11,7 +11,7 @@
   <script src="stats.js?v=13" defer></script>
   <script src="app.js?v=16" defer></script>
   <script src="wind-model.js?v=13" defer></script>
-  <script src="wind.js?v=15" defer></script>
+  <script src="wind.js?v=17" defer></script>
   <script src="../../shared/site-nav.js?v=14" defer></script>
 <link rel="stylesheet" href="../../shared/page-loading.css?v=16">
 <script src="../../shared/page-loading.js?v=16" defer></script>
@@ -127,9 +127,9 @@
     <fieldset class="atmosphere">
       <legend>动态氛围 · 风吹草低</legend>
       <label class="switch-row"><span>视频背景<span class="switch-hint">随正文输入节奏，慢 / 中 / 快三档平滑切换</span></span><input type="checkbox" id="motionToggle" checked></label>
-      <p class="atmosphere-hint"><span id="tierRatesHint">慢档 0.45× · 中档 1.0× · 快档 1.5×</span><br>按最近输入间隔与字数估计节奏；逐字输入保持连贯，停笔约 7.2 秒后渐慢，8.2–10 秒内暂停；风声与阳光仍按原节奏淡出。</p>
-      <label class="slider-row"><span>快档速度</span><span class="slider-control"><input type="range" id="fastRate" min="1" max="2" step="0.1" value="1.5" aria-label="快档速度" aria-describedby="fastRateHint"><b id="fastRateValue">1.5×</b></span></label>
-      <p class="atmosphere-hint" id="fastRateHint">可调 1.0×–2.0×，默认 1.5×；只影响视频快档，调节时平滑过渡。</p>
+      <p class="atmosphere-hint"><span id="tierRatesHint">慢档 0.45× · 中档 1.0× · 快档 1.2×</span><br>按最近输入间隔与字数估计节奏；逐字输入保持连贯，停笔约 7.2 秒后渐慢，8.2–10 秒内暂停；风声与阳光仍按原节奏淡出。</p>
+      <label class="slider-row"><span>快档速度</span><span class="slider-control"><input type="range" id="fastRate" min="1" max="2" step="0.1" value="1.2" aria-label="快档速度" aria-describedby="fastRateHint"><b id="fastRateValue">1.2×</b></span></label>
+      <p class="atmosphere-hint" id="fastRateHint">可调 1.0×–2.0×，默认 1.2×；只影响视频快档，调节时平滑过渡。</p>
       <label class="select-row" for="pauseSeconds">停笔后暂停<select id="pauseSeconds" aria-describedby="pauseSecondsHint"><option value="0">自动 · 8.2–10 秒</option><option value="1">1 秒</option><option value="2">2 秒</option><option value="3">3 秒</option><option value="4">4 秒</option><option value="5">5 秒</option><option value="8">8 秒</option><option value="10">10 秒</option></select></label>
       <p class="atmosphere-hint" id="pauseSecondsHint">从最后一次真实落字开始计时，先渐慢再暂停。仅影响视频；选择较短时间可能重新出现字间启停。</p>
       <p class="atmosphere-hint" id="videoPaceStatus">空闲 · 已暂停</p>

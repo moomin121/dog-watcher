@@ -7,7 +7,7 @@
   const pace = new VideoPace(), wind = new WindModel();
   const motion = new VideoPace({ adaptive: true });
   const key = 'writing-skin:sunny-meadow:video-atmosphere:fix';
-  const defaults = { motion: true, particles: true, sunlight: true, sound: true, particleRate: 50, sunStrength: 50, volume: 24, pauseSeconds: 0, fastRate: 1.5 };
+  const defaults = { motion: true, particles: true, sunlight: true, sound: true, particleRate: 50, sunStrength: 50, volume: 24, pauseSeconds: 0, fastRate: 1.2 };
   const settings = { ...defaults };
   try {
     const saved = JSON.parse(localStorage.getItem(key));
@@ -93,8 +93,6 @@
       const tierName = { idle: '空闲', slow: '慢档', medium: '中档', fast: '快档' }[motion.tier];
       const videoStatus = failed ? '背景视频加载失败 · 请刷新重试' : reduced.matches ? '系统减少动态 · 静态背景' : !settings.motion ? '背景动画已关闭 · 可在背景面板开启' : !ready ? '背景视频加载中…' : blocked ? '背景播放受限 · 请点击正文后输入' : motion.active ? `${tierName} · ${motion.playbackRate.toFixed(2)}× · 节奏 ${Math.round(motion.rate)} 字/分` : !firstInput ? '背景已就绪 · 在正文输入后启动动画' : '停笔 · 背景已暂停，继续输入恢复';
       $('videoPaceStatus').textContent = videoStatus;
-      const status = $('backgroundStatus');
-      if (status) status.textContent = videoStatus;
       statusAt = now;
     }
     if (audio) {
