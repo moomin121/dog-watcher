@@ -53,6 +53,20 @@ apply(input, { inputType: 'insertLineBreak' });
 assert.equal(input.value, '　　正文\n　　');
 assert.equal(input.selectionStart, 7);
 console.log('PASS: independent loading, extracted media, async analytics, paragraph indentation');
+assert.match(meadow, /id="titleInput"[^>]*value="风吹草低"/);
+assert.match(meadow, /　　动态码字主题尝试，还在调试中。背景是连续视频，叶子是程序写的特效<\/textarea>/);
+const restoreBlock = source('themes/meadow/app.js').split('  try {')[1].split('  // 每段默认')[0];
+const previousBody = '　　同样的鲁恩语，同样凝重而紧绷的感觉。这是哪里？我想做什么？我野象知道……周明瑞冷静了下来，无声重复了两人的问题。';
+for (const saved of [null, { title: '非凡者', body: previousBody }, { title: '我的草稿', body: '自己的正文' }, { title: '非凡者', body: previousBody + '新增' }]) {
+  const title = { value: '风吹草低' }, body = { value: '　　动态码字主题尝试，还在调试中。背景是连续视频，叶子是程序写的特效' };
+  const ctx = { title, body, storageKey: 'test', localStorage: { getItem: () => JSON.stringify(saved), setItem: () => {} }, snapshot: () => ({title:title.value,body:body.value}), $: () => ({textContent:''}) };
+  vm.runInNewContext('try {' + restoreBlock, ctx);
+  const preserved = saved && !(saved.title === '非凡者' && saved.body === previousBody);
+  assert.equal(title.value, preserved ? saved.title : '风吹草低');
+  assert.equal(body.value, preserved ? saved.body : '　　动态码字主题尝试，还在调试中。背景是连续视频，叶子是程序写的特效');
+}
+console.log('PASS: preset migration preserves edited drafts');
+assert.match(meadow, /app\.js\?v=18/);
 assert.match(meadow, /wind\.js\?v=17/);
 assert.match(source('themes/meadow/wind.js'), /pauseSeconds: 0, fastRate: 1\.2/);
 assert.match(meadow, /id="fastRate"[^>]*value="1\.2"/);

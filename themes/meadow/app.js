@@ -14,7 +14,11 @@
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
     if (saved && typeof saved.title === 'string' && typeof saved.body === 'string') {
-      title.value = saved.title; body.value = saved.body; $('saveState').textContent = '已保存在本机';
+      const oldPreset = '同样的鲁恩语，同样凝重而紧绷的感觉。这是哪里？我想做什么？我野象知道……周明瑞冷静了下来，无声重复了两人的问题。';
+      const isOldPreset = saved.title === '非凡者' && saved.body.trim() === oldPreset;
+      if (!isOldPreset) { title.value = saved.title; body.value = saved.body; }
+      else { localStorage.setItem(storageKey, JSON.stringify(snapshot())); }
+      $('saveState').textContent = '已保存在本机';
     }
   } catch { $('saveState').textContent = '本地保存不可用'; }
   // 每段默认两个全角空格；空白分隔行保留，已有缩进不重复添加。
