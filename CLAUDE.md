@@ -22,4 +22,6 @@ git commit -m "feat: add extensible shared site navigation"
 git push origin main
 ```
 
-修改狗狗督查页面时，保留摄像头检测、视频内嵌资源和正文持久化逻辑；修改风吹草低页面时，保持视频节奏模型和共享导航引用有效。
+修改狗狗督查页面时，保留摄像头检测和正文持久化逻辑；狗狗媒体已拆分到 `assets/dog/`，不要重新内嵌大段 base64。第三方统计必须 async，不得阻塞编辑器。两页仅以 DOMContentLoaded 判断当前页就绪，不等媒体、字体或另一页。`shared/writer-indent.js` 提供统一的两全角空格缩进；草地保留自身提交与撤销流程，只复用 normalize。背景状态只放设置面板，禁止插入底栏与计划重叠。
+
+浏览器回归：打开各页后执行 `tests/editor-browser.js`，覆盖独立就绪、输入、粘贴、回车、IME、重复缩进和底栏。

@@ -30,7 +30,29 @@ for (const page of pages) {
 }
 
 const meadow = source('themes/meadow/index.html');
-assert.match(meadow, /id="backgroundStatus" role="status"/);
+assert.doesNotMatch(meadow, /id="backgroundStatus"/);
+for (const page of pages) {
+  const html = source(page.file);
+  assert.match(html, /id="pageLoading"/);
+  assert.match(html, /page-loading\.js\?v=16/);
+  assert.doesNotMatch(html, /<iframe|rel="prefetch"/);
+}
+const dog = source('write.html');
+assert.ok(Buffer.byteLength(dog) < 150000, 'dog HTML must not embed media');
+assert.doesNotMatch(dog, /id="embedded(?:IdleGif|FocusMp4|BarkMp4)"/);
+assert.match(dog, /<script async[^>]*id="LA_COLLECT"/);
+assert.match(dog, /WriterIndent\.attach\(bodyInput\)/);
+for (const asset of ['idle.gif', 'focus.mp4', 'bark.mp4']) assert.ok(exists('assets/dog/' + asset));
+const indentContext = { window: {} };
+vm.runInNewContext(source('shared/writer-indent.js'), indentContext);
+const { normalize, apply } = indentContext.window.WriterIndent;
+assert.equal(normalize('第一段\n 第二段\n　　第三段'), '　　第一段\n　　第二段\n　　第三段');
+assert.equal(normalize(normalize('正文')), '　　正文');
+const input = { value: '正文\n', selectionStart: 3, selectionEnd: 3, setSelectionRange(a,b) { this.selectionStart=a; this.selectionEnd=b; } };
+apply(input, { inputType: 'insertLineBreak' });
+assert.equal(input.value, '　　正文\n　　');
+assert.equal(input.selectionStart, 7);
+console.log('PASS: independent loading, extracted media, async analytics, paragraph indentation');
 assert.match(meadow, /wind\.js\?v=15/);
 assert.match(source('themes/meadow/wind.js'), /背景已就绪 · 在正文输入后启动动画/);
 assert.match(source('themes/meadow/wind.js'), /!document\.hidden && motion\.active/);

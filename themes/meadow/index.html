@@ -9,14 +9,18 @@
   <link rel="stylesheet" href="styles.css?v=13">
   <link rel="stylesheet" href="../../shared/site-nav.css?v=14">
   <script src="stats.js?v=13" defer></script>
-  <script src="app.js?v=13" defer></script>
+  <script src="app.js?v=16" defer></script>
   <script src="wind-model.js?v=13" defer></script>
   <script src="wind.js?v=15" defer></script>
   <script src="../../shared/site-nav.js?v=14" defer></script>
+<link rel="stylesheet" href="../../shared/page-loading.css?v=16">
+<script src="../../shared/page-loading.js?v=16" defer></script>
+<script src="../../shared/writer-indent.js?v=16"></script>
 </head>
 <body data-page-id="meadow">
+<div id="pageLoading" role="status" aria-label="页面加载中"><span class="loading-spinner"></span>正在准备编辑器…</div>
   <div class="wallpaper" aria-hidden="true"></div>
-  <video id="meadowVideo" class="meadow-video" muted loop playsinline preload="auto" poster="assets/video-stable-poster.jpg" aria-hidden="true" disablepictureinpicture tabindex="-1"><source src="assets/meadow-stable-loop-v2.mp4" type="video/mp4"></video>
+  <video id="meadowVideo" class="meadow-video" muted loop playsinline preload="metadata" poster="assets/video-stable-poster.jpg" aria-hidden="true" disablepictureinpicture tabindex="-1"><source src="assets/meadow-stable-loop-v2.mp4" type="video/mp4"></video>
   <div id="meadowSun" class="meadow-sun" aria-hidden="true"></div>
   <div class="app" aria-label="作家助手写作界面 · 风吹草低皮肤预览">
     <header class="titlebar">
@@ -78,7 +82,6 @@
         </main>
         <footer class="statusbar" aria-label="编辑区状态栏">
           <button class="status-new" type="button"><img class="ic" src="assets/icons/icon-plus.svg" alt="">新建章节</button>
-          <span id="backgroundStatus" role="status" style="font-size:12px;color:var(--muted)">背景视频加载中…</span>
           <span class="status-plan"><img class="ic" src="assets/icons/status-icon-progress.svg" alt="">计划: 剩<b>700</b></span>
           <span class="status-right"><span class="pair">纠错：<b>5</b></span><span class="divider-v" aria-hidden="true"></span><span class="pair">本章：<b id="footerCount">189</b><img class="ic" src="assets/icons/status-icon-triangle-up.svg" alt=""></span></span>
         </footer>

@@ -19,7 +19,7 @@
   } catch { $('saveState').textContent = '本地保存不可用'; }
   // 每段默认两个全角空格；空白分隔行保留，已有缩进不重复添加。
   function indentParagraphs(value) {
-    return value.split('\n').map(line => line.trim() ? '　　' + line.replace(/^[\t \u3000]+/, '') : line).join('\n');
+    return window.WriterIndent.normalize(value);
   }
   body.value = indentParagraphs(body.value);
   committedBody = body.value;
