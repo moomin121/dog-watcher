@@ -24,7 +24,8 @@
         defaultOpen: true,
         items: [
           { id: 'meadow', title: '风吹草低', href: 'themes/meadow/' },
-          { id: 'coastal-road', title: '通向海边', href: 'themes/coastal-road/' }
+          { id: 'coastal-road', title: '通向海边', href: 'themes/coastal-road/' },
+          { id: 'christmas', title: '圣诞快乐', href: 'themes/christmas/' }
         ]
       },
       {

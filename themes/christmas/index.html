@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#080F1C">
+  <title>圣诞快乐 · 深色码字主题</title>
+  <link rel="stylesheet" href="theme.css?v=1">
+  <link rel="stylesheet" href="styles.css?v=1">
+  <script src="stats.js?v=1" defer></script>
+  <script src="app.js?v=1" defer></script>
+  <script src="snow.js?v=1" defer></script>
+  <link rel="stylesheet" href="../../shared/site-nav.css?v=14">
+  <script src="../../shared/site-nav.js?v=15" defer></script>
+  <link rel="stylesheet" href="../../shared/page-loading.css?v=16">
+  <script src="../../shared/page-loading.js?v=16" defer></script>
+</head>
+<body data-page-id="christmas">
+  <div id="pageLoading" role="status" aria-label="页面加载中"><span class="loading-spinner"></span>正在准备编辑器…</div>
+  <div class="wallpaper" aria-hidden="true"></div>
+  <canvas id="snowCanvas" class="snow-canvas" aria-hidden="true"></canvas>
+  <div class="app" aria-label="作家助手写作界面 · 圣诞雪夜皮肤预览">
+    <header class="titlebar">
+      <div class="tabs">
+        <span class="tab tab-work"><img class="ic" src="assets/icons/tabs-icon-workbench.svg" alt="">工作台</span>
+        <span class="tab tab-book active"><img class="ic" src="assets/icons/tabs-icon-book.svg" alt="">诡秘之主<img class="ic tab-close" src="assets/icons/icon-close-m.svg" alt=""></span>
+        <span class="tab tab-web"><img class="ic" src="assets/icons/tabs-icon-web.svg" alt="">诡秘之主小说<img class="ic tab-close" src="assets/icons/icon-close-m.svg" alt=""></span>
+        <span class="tab tab-more"><img class="ic" src="assets/icons/icon-chevron-down.svg" alt=""></span>
+      </div>
+      <div class="titlebar-right">
+        <span class="sync-state"><time id="clock"></time><span id="saveState">本地预览</span></span>
+        <span class="divider-v" aria-hidden="true"></span>
+        <button class="circle-btn" type="button" title="同步" aria-label="同步"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.2 8a5.2 5.2 0 1 1-1.6-3.75M13.2 1.8v3h-3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        <button class="circle-btn" type="button" title="设置" aria-label="设置"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.1" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.8v2m0 8.4v2M1.8 8h2m8.4 0h2M3.6 3.6 5 5m6 6 1.4 1.4M12.4 3.6 11 5m-6 6-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        <span class="win-btns" aria-hidden="true">
+          <svg viewBox="0 0 10 10"><path d="M1 5h8" stroke="currentColor" stroke-width="1"/></svg>
+          <svg viewBox="0 0 10 10"><rect x="1.5" y="1.5" width="7" height="7" fill="none" stroke="currentColor" stroke-width="1"/></svg>
+          <svg viewBox="0 0 10 10"><path d="m1.5 1.5 7 7m0-7-7 7" stroke="currentColor" stroke-width="1"/></svg>
+        </span>
+      </div>
+    </header>
+    <nav class="toolbar" aria-label="写作工具栏">
+      <div class="tool-group">
+        <button id="fontButton" type="button" title="调整正文字号"><img class="ic" src="assets/icons/toolbar-icon-font.svg" alt=""><span>字体</span></button>
+        <button id="themeButton" type="button"><img class="ic" src="assets/icons/toolbar-icon-skin.svg" alt=""><span>背景</span></button>
+        <span class="v-divider" aria-hidden="true"></span>
+        <button id="undoButton" type="button" class="icon-btn" title="撤销" aria-label="撤销"><img class="ic" src="assets/icons/toolbar-icon-undo.svg" alt=""></button>
+        <button id="redoButton" type="button" class="icon-btn" title="重做" aria-label="重做"><img class="ic" src="assets/icons/toolbar-icon-redo.svg" alt=""></button>
+        <button id="formatButton" type="button"><img class="ic" src="assets/icons/toolbar-icon-format.svg" alt=""><span>一键排版</span></button>
+        <button id="insertButton" type="button"><img class="ic" src="assets/icons/toolbar-icon-insert.svg" alt=""><span>插入</span></button>
+      </div>
+      <div class="tool-group">
+        <button id="fullscreenButton" type="button" class="secondary-tool"><img class="ic" src="assets/icons/toolbar-icon-fullscreen.svg" alt=""><span>全屏</span></button>
+        <button id="focusButton" type="button" aria-pressed="false"><img class="ic" src="assets/icons/toolbar-icon-closedoor.svg" alt=""><span>闭关</span></button>
+        <span class="v-divider" aria-hidden="true"></span>
+        <button id="findButton" type="button"><img class="ic" src="assets/icons/toolbar-icon-find.svg" alt=""><span>查找替换</span></button>
+        <button id="nameButton" type="button"><img class="ic" src="assets/icons/toolbar-icon-name.svg" alt=""><span>取名</span></button>
+        <button id="painterButton" type="button" class="secondary-tool"><img class="ic" src="assets/icons/toolbar-icon-aiimg.svg" alt=""><span>画师</span></button>
+        <button id="historyButton" type="button" class="secondary-tool"><img class="ic" src="assets/icons/toolbar-icon-history.svg" alt=""><span>历史</span></button>
+        <button id="exportButton" type="button" class="publish"><span>发布</span></button>
+      </div>
+    </nav>
+    <div class="main">
+      <button class="drag-handle" id="sidebarHandle" type="button" aria-label="收起或调整目录宽度" aria-expanded="true" title="拖动调整宽度，点击收起/展开">
+        <svg viewBox="0 0 8 12" aria-hidden="true"><path d="M6.5 1 2 6l4.5 5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <aside class="sidebar" aria-label="站点目录">
+        <nav class="site-nav" aria-label="站点目录"></nav>
+      </aside>
+      <section class="center">
+        <main class="editor" id="editorScroll" aria-label="正文编辑区">
+          <div class="paper">
+            <div class="chapter-kicker"><span>平安夜</span><span class="kicker-line"></span><span>CHRISTMAS NOTES</span></div>
+            <input class="title-input" id="titleInput" aria-label="章节标题" value="圣诞快乐" spellcheck="false">
+            <div class="chapter-divider" aria-hidden="true"></div>
+            <textarea class="body-input" id="bodyInput" aria-label="章节正文" spellcheck="false">　　圣诞快乐！雪夜市集的灯一盏盏亮着，陪你在长夜里慢慢写字。</textarea>
+            <div class="end-mark" aria-hidden="true">·　·　·</div>
+          </div>
+        </main>
+        <footer class="statusbar" aria-label="编辑区状态栏">
+          <button class="status-new" type="button"><img class="ic" src="assets/icons/icon-plus.svg" alt="">新建章节</button>
+          <span class="status-plan"><img class="ic" src="assets/icons/status-icon-progress.svg" alt="">计划: 剩<b>700</b></span>
+          <span class="status-right"><span class="pair">纠错：<b>5</b></span><span class="divider-v" aria-hidden="true"></span><span class="pair">本章：<b id="footerCount">21</b><img class="ic" src="assets/icons/status-icon-triangle-up.svg" alt=""></span></span>
+        </footer>
+      </section>
+      <aside class="rail" aria-label="辅助工具">
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-proofread.svg" alt=""><span>校对</span></div>
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-spell.svg" alt=""><span>拼字</span></div>
+        <span class="rail-divider" aria-hidden="true"></span>
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-outline.svg" alt=""><span>大纲</span></div>
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-character.svg" alt=""><span>角色</span></div>
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-storysetting.svg" alt=""><span>设定</span></div>
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-note.svg" alt=""><span>灵感</span></div>
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-book.svg" alt=""><span>双栏</span></div>
+        <span class="rail-divider" aria-hidden="true"></span>
+        <div class="rail-item"><img class="ic" src="assets/icons/rail-icon-miaobi.svg" alt=""><span>妙笔</span></div>
+      </aside>
+    </div>
+    <aside class="stats" id="statsPanel" aria-label="字数统计">
+      <div class="stats-head"><span>字数统计</span><button id="statsClose" type="button" aria-label="关闭字数统计">×</button></div>
+      <figure class="stats-visual" aria-label="节日视觉元素"><span class="stats-snowman" aria-hidden="true">⛄</span></figure>
+      <div class="stat-rows">
+        <div><span>本章字数</span><b id="statChapter">0</b></div>
+        <div><span>码字速率(字/分)</span><b id="statSpeed">0</b></div>
+        <div><span>码字时间</span><b id="statActive">00:00:00</b></div>
+        <div><span>空闲时间</span><b id="statIdle">00:00:00</b></div>
+      </div>
+    </aside>
+  </div>
+  <dialog id="themeDialog" class="theme-dialog" aria-labelledby="themeTitle">
+    <div class="dialog-head"><div><span class="eyebrow">WRITING SKIN / 05</span><h2 id="themeTitle">圣诞雪夜</h2></div><button id="closeTheme" class="close-button" aria-label="关闭皮肤设置">×</button></div>
+    <img class="theme-preview" src="assets/wallpaper.png" alt="深蓝夜空下的圣诞市集，暖灯与雪">
+    <p>深色工作台：雪夜市集壁纸从正文区透出，顶栏与侧栏为深色半透明玻璃。</p>
+    <div class="palette" aria-label="皮肤分区配色">
+      <span style="--swatch:#0C1B2C" title="实色背景2 · 顶栏"></span>
+      <span style="--swatch:#0C1B2C" title="实色背景1 · 工具栏"></span>
+      <span style="--swatch:rgba(7,20,37,.30)" title="背景半透 · 左右侧栏"></span>
+      <span style="--swatch:#A6C8DD" title="主色"></span>
+      <span style="--swatch:#CFDAE2" title="正文"></span>
+      <span style="--swatch:rgba(10,29,48,.68)" title="统计视觉元素底色"></span>
+    </div>
+    <label class="select-row">背景固定位置<select id="anchorSelect"><option value="center bottom" selected>中下 · 推荐</option><option value="left bottom">左下</option><option value="center">居中 · 裁切</option><option value="left top">左上</option><option value="right top">右上</option><option value="right bottom">右下</option></select></label>
+    <label class="select-row">正文字号<select id="fontSelect"><option value="15">15 px</option><option value="16">16 px</option><option value="18" selected>18 px</option><option value="20">20 px</option><option value="22">22 px</option></select></label>
+    <fieldset class="atmosphere">
+      <legend>动态氛围 · 圣诞飘雪</legend>
+      <label class="switch-row"><span>飘雪<span class="switch-hint">默认轻雪，随时可停</span></span><input type="checkbox" id="snowToggle" checked></label>
+      <p class="atmosphere-hint">雪花绘制在壁纸之上、界面之下，遵循系统“减少动态”设置。调节值自动保存在本机。</p>
+    </fieldset>
+    <div class="dialog-links"><a href="assets/wallpaper.png" target="_blank" rel="noopener">查看完整壁纸 ↗</a><a href="assets/wallpaper.png" download="圣诞雪夜-写作壁纸.png">下载壁纸 ↓</a></div>
+  </dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <span id="fontStatus" hidden></span>
+</body>
+</html>
