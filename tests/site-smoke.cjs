@@ -183,9 +183,11 @@ assert.match(christmas, /id="typingSoundToggle"/);
 const typingFx = source('themes/christmas/typing-fx.js');
 assert.match(typingFx, /writing-skin:christmas:atmosphere:v1/); // 与飘雪/最亮档字数共用且合并写
 assert.match(typingFx, /AudioContext/);                          // 音效为 WebAudio 合成，无音频文件
-assert.match(typingFx, /659\.25, 659\.25, 659\.25/);             // Jingle Bells 旋律开头（E E E）
-assert.match(typingFx, /783\.99, 523\.25, 587\.33/);             // 旋律段 E G C D E
-assert.match(typingFx, /783\.99, 783\.99, 698\.46, 587\.33, 523\.25/); // 第二段结尾 G G F D C（完整副歌两段）
+assert.match(typingFx, /659\.25, 659\.25, 659\.25/);             // 副歌旋律开头（E E E）
+assert.match(typingFx, /783\.99, 523\.25, 587\.33/);             // 副歌段 E G C D E
+assert.match(typingFx, /783\.99, 783\.99, 698\.46, 587\.33, 523\.25/); // 副歌第二段结尾 G G F D C
+assert.match(typingFx, /392\.00, 659\.25, 587\.33, 523\.25, 392\.00/); // 主歌开头 Dashing through the snow（G4 E5 D5 C5 G4）
+assert.match(typingFx, /880\.00/);                                // 主歌最高音 A5（a sleighing song tonight）
 assert.match(typingFx, /'❄️', delay: 0/);                        // 4 个发光 emoji 绽放
 assert.match(typingFx, /type-fx-bell|type-fx-dot/);              // 铃铛光斑 + 八方粒子
 assert.match(typingFx, /insertText\|insertCompositionText/);     // 只响应真实键入，粘贴/撤销不触发

@@ -31,21 +31,31 @@
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
-  /* ===== 音效：Jingle Bells 完整副歌两段（E E E | E E E | E G C D E | F F F F | F E E E | E D D E D G
-     ｜ E E E | E E E | E G C D E | F F F F | F E E E | G G F D C） ===== */
+  /* ===== 音效：Jingle Bells 整首歌（主歌 + 副歌两遍，与现有副歌同音区，即 G 大调记谱整体上移纯四度）。
+     主歌：Dashing through the snow / in a one-horse open sleigh / O'er the fields we go /
+     laughing all the way / Bells on bobtail ring / making spirits bright /
+     what fun it is to ride and sing / a sleighing song tonight ===== */
   const MELODY = [
+    392.00, 659.25, 587.33, 523.25, 392.00,                         // Dashing through the snow (G4 E5 D5 C5 G4)
+    392.00, 392.00, 392.00, 659.25, 587.33, 523.25, 440.00,        // in a one-horse open sleigh
+    440.00, 698.46, 659.25, 587.33, 493.88,                        // O'er the fields we go (A4 F5 E5 D5 B4)
+    783.99, 783.99, 698.46, 587.33, 659.25,                        // laughing all the way (G5 G5 F5 D5 E5)
+    392.00, 659.25, 587.33, 523.25, 392.00,                        // Bells on bobtail ring
+    392.00, 659.25, 587.33, 523.25, 440.00,                        // making spirits bright
+    440.00, 440.00, 698.46, 659.25, 587.33, 783.99, 783.99, 783.99,// what fun it is to ride and sing
+    783.99, 880.00, 783.99, 698.46, 587.33, 523.25,                // a sleighing song tonight (G5 A5 G5 F5 D5 C5)
+    659.25, 659.25, 659.25,                                        // 副歌：Jingle bells, jingle bells
     659.25, 659.25, 659.25,
+    659.25, 783.99, 523.25, 587.33, 659.25,                        // jingle all the way
+    698.46, 698.46, 698.46, 698.46,                                // Oh what fun it is to ride
+    698.46, 659.25, 659.25, 659.25,
+    659.25, 587.33, 587.33, 659.25, 587.33, 783.99,                // in a one-horse open sleigh, hey!
+    659.25, 659.25, 659.25,                                        // 副歌第二遍
     659.25, 659.25, 659.25,
     659.25, 783.99, 523.25, 587.33, 659.25,
     698.46, 698.46, 698.46, 698.46,
     698.46, 659.25, 659.25, 659.25,
-    659.25, 587.33, 587.33, 659.25, 587.33, 783.99,
-    659.25, 659.25, 659.25,
-    659.25, 659.25, 659.25,
-    659.25, 783.99, 523.25, 587.33, 659.25,
-    698.46, 698.46, 698.46, 698.46,
-    698.46, 659.25, 659.25, 659.25,
-    783.99, 783.99, 698.46, 587.33, 523.25
+    783.99, 783.99, 698.46, 587.33, 523.25                         // in a one-horse open sleigh（G G F D C）
   ];
   let ctx = null, noteIndex = 0;
   function ensureAudio() {
