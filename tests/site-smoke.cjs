@@ -140,6 +140,10 @@ assert.match(christmasStyles, /\.ic\{filter:brightness\(0\) invert\(1\)\}/);
 assert.match(christmasStyles, /\.ic\[src\*="tabs-icon-workbench"\],\.ic\[src\*="tabs-icon-book"\]\{filter:none\}/);
 console.log('PASS: christmas dark theme inverts monochrome icons and keeps brand icons colored');
 
+// —— 写作区遮罩：雪落原版 .winter-scene::after 的移植，最亮档时保护正文可读性 ——
+assert.match(christmasStyles, /\.wallpaper::after\{[^}]*linear-gradient\([^)]*\)[^}]*radial-gradient\(ellipse 51% 40% at 51% 40%/);
+console.log('PASS: christmas writing-area scrim mirrors snowfall original over brightest wallpaper');
+
 // —— 降雪：与雪落静态页同一套模型与绘制 ——
 const snow = source('themes/christmas/snow.js');
 assert.match(snow, /class SnowPace/);
