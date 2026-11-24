@@ -185,12 +185,15 @@ assert.match(typingFx, /writing-skin:christmas:atmosphere:v1/); // 与飘雪/最
 assert.match(typingFx, /AudioContext/);                          // 音效为 WebAudio 合成，无音频文件
 assert.match(typingFx, /659\.25, 659\.25, 659\.25/);             // Jingle Bells 旋律开头（E E E）
 assert.match(typingFx, /783\.99, 523\.25, 587\.33/);             // 旋律段 E G C D E
+assert.match(typingFx, /783\.99, 783\.99, 698\.46, 587\.33, 523\.25/); // 第二段结尾 G G F D C（完整副歌两段）
 assert.match(typingFx, /'❄️', delay: 0/);                        // 4 个发光 emoji 绽放
 assert.match(typingFx, /type-fx-bell|type-fx-dot/);              // 铃铛光斑 + 八方粒子
 assert.match(typingFx, /insertText\|insertCompositionText/);     // 只响应真实键入，粘贴/撤销不触发
 assert.match(typingFx, /FX_MIN_INTERVAL = 700/);                 // 特效节流：连续键入不密集
-assert.match(typingFx, /SOUND_MIN_INTERVAL = 350/);              // 音符节流：旋律舒缓
+assert.match(typingFx, /SOUND_MIN_INTERVAL = 100/);              // 音符节流：跟得上较快打字
+assert.match(typingFx, /BASE_OPACITY/);                          // 元素变淡，不干扰正文
 new vm.Script(typingFx, { filename: 'themes/christmas/typing-fx.js' });
-assert.match(christmasStyles, /\.type-fx-emoji\{[^}]*drop-shadow/);
+assert.match(christmasStyles, /\.type-fx-emoji\{[^}]*font-size:13px/); // emoji 缩小
 assert.match(christmasStyles, /\.type-fx-bell\{[^}]*#ef4444/);
-console.log('PASS: christmas typing burst effects and Jingle Bells note-per-keystroke sound');
+assert.match(christmasStyles, /\.type-fx-layer\{[^}]*z-index:1/);      // 特效层在 .app(z-index:2) 之下：渲染在文字后方
+console.log('PASS: christmas typing burst effects and Jingle Bells full-chorus note-per-keystroke sound');

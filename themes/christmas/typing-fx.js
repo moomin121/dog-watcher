@@ -31,14 +31,21 @@
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
-  /* ===== 音效：Jingle Bells 逐音符（E E E | E E E | E G C D E | F F F F | F E E E | E D D E D G） ===== */
+  /* ===== 音效：Jingle Bells 完整副歌两段（E E E | E E E | E G C D E | F F F F | F E E E | E D D E D G
+     ｜ E E E | E E E | E G C D E | F F F F | F E E E | G G F D C） ===== */
   const MELODY = [
     659.25, 659.25, 659.25,
     659.25, 659.25, 659.25,
     659.25, 783.99, 523.25, 587.33, 659.25,
     698.46, 698.46, 698.46, 698.46,
     698.46, 659.25, 659.25, 659.25,
-    659.25, 587.33, 587.33, 659.25, 587.33, 783.99
+    659.25, 587.33, 587.33, 659.25, 587.33, 783.99,
+    659.25, 659.25, 659.25,
+    659.25, 659.25, 659.25,
+    659.25, 783.99, 523.25, 587.33, 659.25,
+    698.46, 698.46, 698.46, 698.46,
+    698.46, 659.25, 659.25, 659.25,
+    783.99, 783.99, 698.46, 587.33, 523.25
   ];
   let ctx = null, noteIndex = 0;
   function ensureAudio() {
@@ -104,7 +111,7 @@
       el.style.setProperty('--glow', e.glow);
       box.appendChild(el);
       makeItem('emoji', e.delay, 1500, el,
-        (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100 - 50, Math.random() * 360, born);
+        (Math.random() - 0.5) * 72, (Math.random() - 0.5) * 72 - 36, Math.random() * 360, born);
     }
     const bell = document.createElement('span');
     bell.className = 'type-fx-item type-fx-bell';
@@ -116,24 +123,26 @@
       el.className = 'type-fx-item type-fx-dot';
       box.appendChild(el);
       makeItem('dot', 0, 1000, el,
-        Math.cos(i * 45 * Math.PI / 180) * 60, Math.sin(i * 45 * Math.PI / 180) * 60, 0, born);
+        Math.cos(i * 45 * Math.PI / 180) * 44, Math.sin(i * 45 * Math.PI / 180) * 44, 0, born);
     }
 
     animations.push({ kind: 'burst', delay: 0, life: BURST_LIFE, el: box, born });
     if (!raf) raf = requestAnimationFrame(step);
   }
   let raf = 0, last = 0;
+  // 各元素的基准透明度：整体变淡，避免干扰正文阅读
+  const BASE_OPACITY = { emoji: 0.6, bell: 0.55, dot: 0.7 };
   function apply(item, k, ease) {
     if (item.kind === 'emoji') {
-      const s = 1.5 * Math.sin(Math.PI * k);
+      const s = 1.1 * Math.sin(Math.PI * k);
       item.el.style.transform = 'translate(' + (item.dx * ease).toFixed(1) + 'px,' + (item.dy * ease).toFixed(1) + 'px) rotate(' + (item.rot * k).toFixed(0) + 'deg) scale(' + Math.max(0, s).toFixed(3) + ')';
-      item.el.style.opacity = (1 - k).toFixed(2);
+      item.el.style.opacity = (BASE_OPACITY.emoji * (1 - k)).toFixed(2);
     } else if (item.kind === 'bell') {
       item.el.style.transform = 'scale(' + (3 * ease).toFixed(3) + ')';
-      item.el.style.opacity = (1 - k).toFixed(2);
+      item.el.style.opacity = (BASE_OPACITY.bell * (1 - k)).toFixed(2);
     } else if (item.kind === 'dot') {
       item.el.style.transform = 'translate(' + (item.dx * ease).toFixed(1) + 'px,' + (item.dy * ease).toFixed(1) + 'px) scale(' + (1 - k).toFixed(3) + ')';
-      item.el.style.opacity = (1 - k).toFixed(2);
+      item.el.style.opacity = (BASE_OPACITY.dot * (1 - k)).toFixed(2);
     }
   }
   function step(now) {
@@ -182,12 +191,14 @@
     mirror.appendChild(marker);
     const m = marker.getBoundingClientRect();
     const lineHeight = parseFloat(cs.lineHeight) || 24;
-    return { x: m.left, y: m.top + lineHeight * 0.35 };
+    const fontSize = parseFloat(cs.fontSize) || 18;
+    // 出生点退到刚输入的字后方（光标左侧一个字宽），不压住下一个输入位置
+    return { x: m.left - fontSize, y: m.top + lineHeight * 0.35 };
   }
 
   /* ===== 接线（节流：避免连续键入时特效与音符过于密集）===== */
   const FX_MIN_INTERVAL = 700;    // 两次绽放最小间隔（毫秒）
-  const SOUND_MIN_INTERVAL = 350; // 两个音符最小间隔（毫秒），旋律随节奏慢慢走
+  const SOUND_MIN_INTERVAL = 100; // 两个音符最小间隔（毫秒），跟得上较快的打字
   let lastBurstAt = 0, lastNoteAt = 0;
   body.addEventListener('input', event => {
     if (!INPUT_RE.test(event.inputType || '')) return; // 粘贴/撤销/删除等不触发

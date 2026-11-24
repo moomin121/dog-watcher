@@ -46,17 +46,18 @@ input::placeholder,textarea::placeholder{color:var(--faint)}
 .wallpaper::after{content:"";position:absolute;z-index:2;inset:0;background:linear-gradient(90deg,rgba(4,12,23,.2),rgba(5,13,25,.5) 51%,rgba(4,12,23,.2)),radial-gradient(ellipse 51% 40% at 51% 40%,rgba(5,12,24,.58) 0%,rgba(5,12,24,.31) 55%,rgba(5,12,24,0) 78%),linear-gradient(to top,rgba(4,12,23,.6) 0%,rgba(4,12,23,.28) 18%,rgba(4,12,23,0) 34%)}
 .snow-canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
 
-/* ===== 打字特效与光标定位（typing-fx.js，对照 Figma Make 移植）===== */
-.type-fx-layer{position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+/* ===== 打字特效与光标定位（typing-fx.js，对照 Figma Make 移植）=====
+   特效层 z-index 低于 .app：渲染在文字后方，不遮挡已输入的正文。 */
+.type-fx-layer{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
 .type-fx-burst{position:absolute}
 .type-fx-item{position:absolute;left:0;top:0;will-change:transform,opacity;user-select:none;-webkit-user-select:none;pointer-events:none}
-.type-fx-emoji{font-size:22px;line-height:1;filter:drop-shadow(0 0 8px var(--glow,#93c5fd))}
-.type-fx-bell{width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#fbbf24);box-shadow:0 0 20px rgba(239,68,68,.8)}
-.type-fx-dot{width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:#fff;box-shadow:0 0 4px rgba(255,255,255,.8)}
+.type-fx-emoji{font-size:13px;line-height:1;filter:drop-shadow(0 0 4px var(--glow,#93c5fd))}
+.type-fx-bell{width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#fbbf24);box-shadow:0 0 10px rgba(239,68,68,.45)}
+.type-fx-dot{width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:50%;background:#fff;box-shadow:0 0 2px rgba(255,255,255,.5)}
 .caret-mirror{position:absolute;visibility:hidden;white-space:pre-wrap;word-wrap:break-word;overflow:hidden;z-index:-1;pointer-events:none;border:0}
 @media(prefers-reduced-motion:reduce){.type-fx-layer{display:none}}
 
-.app{height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative;z-index:1}
+.app{height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative;z-index:2}
 
 /* ===== 顶栏标签条（实色背景2 · 深色）===== */
 .titlebar{height:40px;flex-shrink:0;display:flex;align-items:flex-end;justify-content:space-between;padding:0 0 0 12px;background:var(--solid-2);border-bottom:1px solid var(--border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
