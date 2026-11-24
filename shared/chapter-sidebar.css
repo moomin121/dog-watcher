@@ -1,0 +1,41 @@
+/* Geometry from the saved Figma sidebar context; colors come from each skin. */
+.chapter-sidebar {
+  --cs-text:var(--text,var(--ink-92,rgba(20,30,41,.92)));
+  --cs-muted:var(--muted,var(--ink-64,rgba(20,30,41,.64)));
+  --cs-faint:var(--faint,var(--ink-34,rgba(20,30,41,.34)));
+  --cs-border:var(--border,var(--line,rgba(20,30,41,.08)));
+  --cs-primary:var(--primary,var(--brand,#1e71ef));
+  --cs-selected:var(--selected-bg,var(--brand-weak,rgba(30,113,239,.12)));
+  --cs-hover:var(--hover-bg,var(--ink-04,rgba(20,30,41,.04)));
+  flex:1;min-height:0;min-width:0;display:flex;flex-direction:column;position:relative;color:var(--cs-text);font-size:13px;line-height:20px;
+}
+.chapter-sidebar *{box-sizing:border-box}
+.chapter-sidebar [hidden]{display:none!important}
+.chapter-sidebar button,.chapter-sidebar input{font:inherit;color:inherit}
+.chapter-sidebar button{border:0;background:transparent;text-align:left;cursor:pointer}
+.chapter-sidebar button:focus-visible{outline:2px solid var(--cs-primary);outline-offset:-2px}
+.cs-icon{display:block;width:16px;height:16px;flex:0 0 16px}
+body[data-page-id="christmas"] .cs-icon{filter:brightness(0) invert(1);opacity:.75}
+.cs-search{display:flex;align-items:center;gap:4px;margin:12px 12px 9px;padding:0 8px;height:32px;flex-shrink:0;border:1px solid var(--cs-border);border-radius:4px;background:var(--field-bg,var(--cs-hover))}
+.cs-search input{border:0;outline:0;background:none;min-width:0;width:100%;font-size:14px}
+.cs-search input::placeholder{color:var(--cs-faint)}
+.cs-actions{display:flex;gap:8px;margin:0 12px 4px;flex-shrink:0}
+.cs-actions button{flex:1;min-width:0;height:28px;border-radius:4px;text-align:center;font-size:12px;line-height:18px}
+.cs-actions .cs-primary{background:var(--cs-primary);color:var(--on-primary,#fff)}
+.cs-actions .cs-secondary{border:1px solid var(--cs-border);color:var(--cs-muted);background:var(--translucent-light,rgba(255,255,255,.3))}
+/* Original site links use the reference directory's spacing and selection shape. */
+.chapter-sidebar .site-nav{
+  --sn-fg:var(--cs-text);
+  --sn-fg-muted:var(--cs-muted);
+  --sn-fg-faint:var(--cs-faint);
+  --sn-accent:var(--cs-primary);
+  --sn-accent-weak:var(--cs-selected);
+  --sn-hover:var(--cs-hover);
+  --sn-line:var(--cs-border);
+  margin-top:8px;
+}
+.chapter-sidebar .site-nav-folder-head{padding:4px 8px;gap:4px;border-radius:3px;font-weight:400}
+.chapter-sidebar .sn-caret{margin:0 3px}
+.chapter-sidebar .site-nav-item{height:30px;line-height:22px;margin:0;padding:4px 8px 4px 28px;border-radius:3px;color:var(--cs-muted)}
+.chapter-sidebar .site-nav-item.active{color:var(--cs-text)}
+.cs-notice{position:absolute;bottom:12px;left:12px;right:12px;padding:12px;border:1px solid var(--cs-border);border-radius:6px;background:var(--solid-1,var(--panel,#fff));backdrop-filter:blur(24px);font-size:12px;color:var(--cs-text);box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:3}

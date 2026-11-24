@@ -16,11 +16,11 @@
 
 ## 站点目录
 
-两个页面共用 `shared/site-nav.js` 与 `shared/site-nav.css`。新增页面时：
+四个页面共用 `shared/chapter-sidebar.js` / `.css` 展示参考样式的搜索框和章卷按钮；下方直接显示的「码字主题／其他」目录及跳转由 `shared/site-nav.js` 与 `shared/site-nav.css` 统一维护。新增页面时：
 
 1. 将页面放到站点目录内，并在 `<body>` 设置唯一 `data-page-id`。
 2. 在 `shared/site-nav.js` 的 `SITE_NAV.folders[].items` 增加 `{ id, title, href }`。
-3. 页面引入相对路径正确的共享 CSS/JS；运行 `node tests/site-smoke.cjs`。
+3. 页面挂载 `.chapter-sidebar`，引入相对路径正确的共享 CSS/JS；`chapter-sidebar.js` 必须在 `site-nav.js` 之前加载。运行 `node tests/site-smoke.cjs`。
 
 目录链接以站点根为基准，适用于本地预览和 `/dog-watcher/` GitHub Pages 子路径。
 

@@ -19,15 +19,17 @@ assert.equal(nav.folders.length, 2);
 assert.deepEqual(nav.folders.map((f) => f.label), ['码字主题', '其他']);
 assert.deepEqual(nav.folders.flatMap((f) => f.items.map((i) => i.title)), ['风吹草低', '通向海边', '圣诞快乐', '狗狗督查']);
 for (const folder of nav.folders) for (const item of folder.items) {
-  assert.match(item.href, /^(?:[a-z0-9_-]+\/)*[a-z0-9_-]+\/$|^[a-z0-9_-]+\.html$/i);
+  assert.match(item.href, /^(?:[a-z0-9_-]+\/)*[a-z0-9_-]+\.html$/i);
   assert.ok(exists(item.href.replace(/\/$/, '/index.html')), `missing route: ${item.href}`);
 }
 
 for (const page of pages) {
   const html = source(page.file);
   assert.match(html, new RegExp(`<body[^>]*data-page-id=["']${page.id}["']`));
-  assert.match(html, new RegExp(`(?:href|src)=["']${page.shared.replaceAll('/', '\\/')}\\?v=15["']`));
-  assert.match(html, /class=["']site-nav["']/);
+  assert.match(html, new RegExp(`(?:href|src)=["']${page.shared.replaceAll('/', '\\/')}\\?v=17["']`));
+  assert.match(html, /class=["']chapter-sidebar["']/);
+  assert.match(html, /chapter-sidebar\.js\?v=2/);
+  assert.ok(html.indexOf("chapter-sidebar.js") < html.indexOf("site-nav.js"), "chapter sidebar must mount before site links");
   assert.match(html, new RegExp(`<title>[^<]*(?:${page.id === 'meadow' ? '风吹草低' : page.id === 'coastal-road' ? '通向海边' : page.id === 'christmas' ? '圣诞快乐' : '狗狗督查'})`));
 }
 
@@ -81,24 +83,14 @@ const assetRefs = [...meadow.matchAll(/(?:src|href)=["']([^"'#?]+)["']/g)].map((
 for (const ref of assetRefs.filter((ref) => !/^(?:https?:|data:|#)/.test(ref))) {
   assert.ok(fs.existsSync(path.resolve(local('themes/meadow'), ref)), `missing meadow asset: ${ref}`);
 }
-for (const file of ['shared/site-nav.js', 'themes/meadow/app.js', 'themes/meadow/wind.js', 'themes/meadow/wind-model.js']) {
+for (const file of ['shared/site-nav.js', 'shared/chapter-sidebar.js', 'themes/meadow/app.js', 'themes/meadow/wind.js', 'themes/meadow/wind-model.js']) {
   new vm.Script(source(file), { filename: file });
 }
-
-function navUrls(pagePath) {
-  const scriptUrl = new URL(pagePath === 'write.html'
-    ? 'https://moomin121.github.io/dog-watcher/shared/site-nav.js?v=15'
-    : 'https://moomin121.github.io/dog-watcher/themes/meadow/../../shared/site-nav.js?v=15');
-  const root = new URL('../', scriptUrl);
-  return nav.folders.flatMap((f) => f.items.map((i) => new URL(i.href, root).href));
+for (const name of ['search']) {
+  assert.ok(fs.statSync(local(`assets/sidebar/sidebar-icon-${name}.svg`)).size > 0, `missing sidebar icon: ${name}`);
 }
-const expected = [
-  'https://moomin121.github.io/dog-watcher/themes/meadow/',
-  'https://moomin121.github.io/dog-watcher/themes/coastal-road/',
-  'https://moomin121.github.io/dog-watcher/themes/christmas/',
-  'https://moomin121.github.io/dog-watcher/write.html'
-];
-for (const page of pages) assert.deepEqual(navUrls(page.file), expected);
+
+require('./navigation-targets.cjs');
 
 console.log('PASS: shared navigation config and routes');
 console.log('PASS: both pages mount the same navigation and page ids');

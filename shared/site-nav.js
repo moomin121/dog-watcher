@@ -23,9 +23,10 @@
         label: '码字主题',
         defaultOpen: true,
         items: [
-          { id: 'meadow', title: '风吹草低', href: 'themes/meadow/' },
-          { id: 'coastal-road', title: '通向海边', href: 'themes/coastal-road/' },
-          { id: 'christmas', title: '圣诞快乐', href: 'themes/christmas/' }
+          // Explicit files also work when opened directly with file://.
+          { id: 'meadow', title: '风吹草低', href: 'themes/meadow/index.html' },
+          { id: 'coastal-road', title: '通向海边', href: 'themes/coastal-road/index.html' },
+          { id: 'christmas', title: '圣诞快乐', href: 'themes/christmas/index.html' }
         ]
       },
       {
@@ -113,15 +114,21 @@
     // 清空容器，避免重复挂载（含内联占位内容）。
     while (container.firstChild) container.removeChild(container.firstChild);
 
-    const search = document.createElement('label');
-    search.className = 'site-nav-search';
-    search.innerHTML = '<span class="sn-search-icon" aria-hidden="true"></span>';
-    const input = document.createElement('input');
-    input.type = 'search';
-    input.placeholder = '搜索目录';
-    input.setAttribute('aria-label', '搜索目录');
-    search.appendChild(input);
-    container.appendChild(search);
+    // The full sidebar provides the reference search field above the action buttons.
+    // Standalone navigation mounts retain their own search field.
+    const sidebar = container.closest('.chapter-sidebar');
+    let input = sidebar && sidebar.querySelector('.cs-search input');
+    if (!input) {
+      const search = document.createElement('label');
+      search.className = 'site-nav-search';
+      search.innerHTML = '<span class="sn-search-icon" aria-hidden="true"></span>';
+      input = document.createElement('input');
+      input.type = 'search';
+      input.placeholder = '搜索目录';
+      input.setAttribute('aria-label', '搜索目录');
+      search.appendChild(input);
+      container.appendChild(search);
+    }
 
     const list = document.createElement('div');
     list.className = 'site-nav-list';
