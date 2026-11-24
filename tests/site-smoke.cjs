@@ -188,6 +188,8 @@ assert.match(typingFx, /783\.99, 523\.25, 587\.33/);             // 旋律段 E 
 assert.match(typingFx, /'❄️', delay: 0/);                        // 4 个发光 emoji 绽放
 assert.match(typingFx, /type-fx-bell|type-fx-dot/);              // 铃铛光斑 + 八方粒子
 assert.match(typingFx, /insertText\|insertCompositionText/);     // 只响应真实键入，粘贴/撤销不触发
+assert.match(typingFx, /FX_MIN_INTERVAL = 700/);                 // 特效节流：连续键入不密集
+assert.match(typingFx, /SOUND_MIN_INTERVAL = 350/);              // 音符节流：旋律舒缓
 new vm.Script(typingFx, { filename: 'themes/christmas/typing-fx.js' });
 assert.match(christmasStyles, /\.type-fx-emoji\{[^}]*drop-shadow/);
 assert.match(christmasStyles, /\.type-fx-bell\{[^}]*#ef4444/);

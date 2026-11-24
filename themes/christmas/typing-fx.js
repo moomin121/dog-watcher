@@ -185,14 +185,22 @@
     return { x: m.left, y: m.top + lineHeight * 0.35 };
   }
 
-  /* ===== 接线 ===== */
+  /* ===== 接线（节流：避免连续键入时特效与音符过于密集）===== */
+  const FX_MIN_INTERVAL = 700;    // 两次绽放最小间隔（毫秒）
+  const SOUND_MIN_INTERVAL = 350; // 两个音符最小间隔（毫秒），旋律随节奏慢慢走
+  let lastBurstAt = 0, lastNoteAt = 0;
   body.addEventListener('input', event => {
     if (!INPUT_RE.test(event.inputType || '')) return; // 粘贴/撤销/删除等不触发
-    if (settings.typingSparkle && !reduced.matches) {
+    const now = performance.now();
+    if (settings.typingSparkle && !reduced.matches && now - lastBurstAt >= FX_MIN_INTERVAL) {
+      lastBurstAt = now;
       const c = caretPoint();
       burst(c.x, c.y);
     }
-    if (settings.typingSound) note();
+    if (settings.typingSound && now - lastNoteAt >= SOUND_MIN_INTERVAL) {
+      lastNoteAt = now;
+      note();
+    }
   });
 
   for (const [id, prop] of [['typingSparkleToggle', 'typingSparkle'], ['typingSoundToggle', 'typingSound']]) {
