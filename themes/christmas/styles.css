@@ -40,8 +40,8 @@ input::placeholder,textarea::placeholder{color:var(--faint)}
 .wallpaper-low{opacity:var(--winter-bg-low,0)}
 .wallpaper-mid{opacity:var(--winter-bg-mid,0)}
 .wallpaper-bright{opacity:var(--winter-bg-bright,0)}
-/* 达标奖励层：目标字数时仍是原四档最亮图，再多打一个字才交叉渐入这张满月市集新图 */
-.wallpaper-goal{background-image:url("assets/wallpaper-goal.jpg")}
+/* 达标奖励层：目标字数时仍是原四档最亮图，再多打一个字才交叉渐入这张满月市集新图（1672×941，与四档图同尺寸） */
+.wallpaper-goal{background-image:url("assets/wallpaper-goal.jpg?v=2")}
 .wallpaper-goal{opacity:var(--winter-bg-goal,0)}
 /* 写作区遮罩（雪落原版移植）：横向渐变 + 正文区径向渐变，最亮档时保护正文可读性。
    底部市集灯光最亮处再叠一条向上的压暗渐变，护住滚动到底部的正文行。

@@ -136,6 +136,30 @@ for (const level of ['wallpaper-dim', 'wallpaper-low', 'wallpaper-mid', 'wallpap
 assert.match(christmas, /wallpaper-layer wallpaper-goal/);
 assert.ok(exists('themes/christmas/assets/wallpaper-goal.jpg'), 'missing christmas goal wallpaper');
 assert.match(source('themes/christmas/app.js'), /--winter-bg-goal.*count > brightCount/);
+// 奖励壁纸必须与四档壁纸同尺寸（1672×941），否则同宽度适应下构图比例不一致
+function jpegSize(path) {
+  const buf = fs.readFileSync(path);
+  let i = 2;
+  while (i < buf.length - 9) {
+    if (buf[i] !== 0xff) { i++; continue; }
+    const marker = buf[i + 1];
+    if (marker === 0xd8 || (marker >= 0xd0 && marker <= 0xd9) || marker === 0x01) { i += 2; continue; }
+    const len = buf.readUInt16BE(i + 2);
+    if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+      return { width: buf.readUInt16BE(i + 7), height: buf.readUInt16BE(i + 5) };
+    }
+    i += 2 + len;
+  }
+  return null;
+}
+function pngSize(path) {
+  const buf = fs.readFileSync(path);
+  return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+}
+const goalDims = jpegSize(local('themes/christmas/assets/wallpaper-goal.jpg'));
+const tierDims = pngSize(local('themes/christmas/assets/wallpaper-bright.png'));
+assert.deepEqual(goalDims, tierDims, `goal wallpaper ${JSON.stringify(goalDims)} must match tier wallpaper ${JSON.stringify(tierDims)}`);
+assert.deepEqual(goalDims, { width: 1672, height: 941 });
 for (const file of ['themes/christmas/app.js', 'themes/christmas/snow.js', 'themes/christmas/stats.js']) {
   new vm.Script(source(file), { filename: file });
 }
@@ -143,7 +167,7 @@ console.log('PASS: christmas dark route, word-count wallpaper gradient, snow lay
 
 // —— 圣诞页目录：与其他页面共用同一结构，仅深浅取色差异（:root 映射到主题变量）——
 const christmasStyles = source('themes/christmas/styles.css');
-assert.match(christmasStyles, /\.wallpaper-goal\{background-image:url\("assets\/wallpaper-goal\.jpg"\)\}/); // 达标奖励层贴图
+assert.match(christmasStyles, /\.wallpaper-goal\{background-image:url\("assets\/wallpaper-goal\.jpg\?v=\d+"\)\}/); // 达标奖励层贴图（带缓存版本号）
 assert.match(christmasStyles, /--ink:var\(--text\)/);
 assert.match(christmasStyles, /--ink-49:var\(--muted\)/);
 assert.match(christmasStyles, /--brand-weak:var\(--selected-bg\)/);
