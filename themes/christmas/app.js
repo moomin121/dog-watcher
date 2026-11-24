@@ -88,6 +88,12 @@
     $('statChapter').textContent = chapter.toLocaleString('zh-CN');
     $('footerCount').textContent = chapter.toLocaleString('zh-CN');
     updateBackground(chapter);
+    const scene = $('snowmanScene');
+    if (scene) {
+      const stage = chapter >= 1200 ? 4 : chapter >= 600 ? 3 : chapter >= 250 ? 2 : chapter >= 80 ? 1 : 0;
+      scene.dataset.stage = String(stage);
+      scene.setAttribute('aria-label', `随本章字数逐步堆起的雪人（第${stage}阶段，共4阶段）`);
+    }
     $('statSpeed').textContent = session.speed(now);
     $('statActive').textContent = formatTime(session.activeMs);
     $('statIdle').textContent = formatTime(session.idleMs);
@@ -113,6 +119,7 @@
     if (body.value !== committedBody) {
       const before = committedBody, inputType = event.inputType || 'insertText';
       session.input(performance.now(), before, body.value, inputType);
+      window.ChristmasSnow?.recordInput(before, body.value, inputType);
       committedBody = body.value;
       remember(); scheduleSave(); refresh();
     }
