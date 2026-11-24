@@ -192,8 +192,8 @@
     const m = marker.getBoundingClientRect();
     const lineHeight = parseFloat(cs.lineHeight) || 24;
     const fontSize = parseFloat(cs.fontSize) || 18;
-    // 出生点退到刚输入的字后方（光标左侧一个字宽），不压住下一个输入位置
-    return { x: m.left - fontSize, y: m.top + lineHeight * 0.35 };
+    // 出生点在光标右上方：右移约一个字宽、上移到本行行距空隙（行高 2.2 时上下各留约 0.6em 空白）
+    return { x: m.left + fontSize * 0.8, y: m.top - lineHeight * 0.05 };
   }
 
   /* ===== 接线（节流：避免连续键入时特效与音符过于密集）===== */
