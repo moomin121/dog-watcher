@@ -136,7 +136,6 @@ for (const level of ['wallpaper-dim', 'wallpaper-low', 'wallpaper-mid', 'wallpap
 assert.match(christmas, /wallpaper-layer wallpaper-goal/);
 assert.ok(exists('themes/christmas/assets/wallpaper-goal.jpg'), 'missing christmas goal wallpaper');
 assert.match(source('themes/christmas/app.js'), /--winter-bg-goal.*count > brightCount/);
-assert.match(christmasStyles, /\.wallpaper-goal\{background-image:url\("assets\/wallpaper-goal\.jpg"\)\}/);
 for (const file of ['themes/christmas/app.js', 'themes/christmas/snow.js', 'themes/christmas/stats.js']) {
   new vm.Script(source(file), { filename: file });
 }
@@ -144,6 +143,7 @@ console.log('PASS: christmas dark route, word-count wallpaper gradient, snow lay
 
 // —— 圣诞页目录：与其他页面共用同一结构，仅深浅取色差异（:root 映射到主题变量）——
 const christmasStyles = source('themes/christmas/styles.css');
+assert.match(christmasStyles, /\.wallpaper-goal\{background-image:url\("assets\/wallpaper-goal\.jpg"\)\}/); // 达标奖励层贴图
 assert.match(christmasStyles, /--ink:var\(--text\)/);
 assert.match(christmasStyles, /--ink-49:var\(--muted\)/);
 assert.match(christmasStyles, /--brand-weak:var\(--selected-bg\)/);
