@@ -46,6 +46,12 @@ input::placeholder,textarea::placeholder{color:var(--faint)}
 .wallpaper::after{content:"";position:absolute;z-index:2;inset:0;background:linear-gradient(90deg,rgba(4,12,23,.2),rgba(5,13,25,.5) 51%,rgba(4,12,23,.2)),radial-gradient(ellipse 51% 40% at 51% 40%,rgba(5,12,24,.58) 0%,rgba(5,12,24,.31) 55%,rgba(5,12,24,0) 78%),linear-gradient(to top,rgba(4,12,23,.6) 0%,rgba(4,12,23,.28) 18%,rgba(4,12,23,0) 34%)}
 .snow-canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
 
+/* ===== 打字特效与光标定位（typing-fx.js）===== */
+.type-fx-layer{position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+.type-spark{position:absolute;left:0;top:0;color:rgba(233,242,248,.95);text-shadow:0 0 6px rgba(166,200,221,.55);will-change:transform,opacity;user-select:none;-webkit-user-select:none}
+.caret-mirror{position:absolute;visibility:hidden;white-space:pre-wrap;word-wrap:break-word;overflow:hidden;z-index:-1;pointer-events:none;border:0}
+@media(prefers-reduced-motion:reduce){.type-fx-layer{display:none}}
+
 .app{height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative;z-index:1}
 
 /* ===== 顶栏标签条（实色背景2 · 深色）===== */
