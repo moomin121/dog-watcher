@@ -7,6 +7,9 @@ button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(
 input:focus,input:focus-visible,textarea:focus,textarea:focus-visible{outline:none;box-shadow:none}
 svg{width:16px;height:16px;flex-shrink:0}
 .ic{width:16px;height:16px;flex-shrink:0;display:block}
+/* 深色模式：单色图标反白；彩色品牌图标（工作台 / 书本）保持原色 */
+.ic{filter:brightness(0) invert(1)}
+.ic[src*="tabs-icon-workbench"],.ic[src*="tabs-icon-book"]{filter:none}
 ::selection{background:var(--selection);color:var(--text)}
 input::placeholder,textarea::placeholder{color:var(--faint)}
 [hidden]{display:none!important}
