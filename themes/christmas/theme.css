@@ -18,9 +18,9 @@
   --selection: #375A72;
   --visual-bg: rgba(10, 29, 48, 0.68);
   --wallpaper-fallback: #080F1C;
-  /* 壁纸：105% 宽度适应、从顶部放置（底部裁切），尺寸见 styles.css .wallpaper-layer。 */
+  /* 壁纸：保持原图大小（宽度 = 100% 视口宽，高度等比），从顶部放置（底部裁切），尺寸见 styles.css .wallpaper-layer。 */
   --wallpaper-position: top;
-  --wallpaper-zoom: 1.05;
+  --wallpaper-zoom: 1;
   /* 打字锚点：光标所在行被固定在编辑区可视高度的这个比例（0~1）。 */
   --caret-anchor: .65;
   --editor-bottom-reserve: max(80px, calc((1 - var(--caret-anchor)) * (100dvh - 112px)));

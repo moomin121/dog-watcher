@@ -144,13 +144,13 @@ console.log('PASS: christmas dark theme inverts monochrome icons and keeps brand
 assert.match(christmasStyles, /\.wallpaper::after\{[^}]*linear-gradient\([^)]*\)[^}]*radial-gradient\(ellipse 51% 40% at 51% 40%/);
 console.log('PASS: christmas writing-area scrim mirrors snowfall original over brightest wallpaper');
 
-// —— 壁纸放置：105% 宽度适应、顶部对齐（底部裁切）——
-assert.match(christmasStyles, /\.wallpaper-layer\{[^}]*background-size:calc\(var\(--wallpaper-zoom,1\.05\)\*100%\) auto/);
+// —— 壁纸放置：原图大小（宽度 100% 适应）、顶部对齐（底部裁切）——
+assert.match(christmasStyles, /\.wallpaper-layer\{[^}]*background-size:calc\(var\(--wallpaper-zoom,1\)\*100%\) auto/);
 const christmasTheme = source('themes/christmas/theme.css');
 assert.match(christmasTheme, /--wallpaper-position: ?top/);
-assert.match(christmasTheme, /--wallpaper-zoom: ?1\.05/);
+assert.match(christmasTheme, /--wallpaper-zoom: ?1;/);
 assert.match(christmas, /<option value="top" selected>顶部 · 裁底/); // 设置面板默认项同步
-console.log('PASS: christmas wallpapers zoom 105% width-fit anchored to top with bottom cropped');
+console.log('PASS: christmas wallpapers keep natural size width-fit anchored to top with bottom cropped');
 
 // —— 降雪：与雪落静态页同一套模型与绘制 ——
 const snow = source('themes/christmas/snow.js');

@@ -29,9 +29,9 @@ input::placeholder,textarea::placeholder{color:var(--faint)}
 }
 
 /* 壁纸：四档雪夜市集随本章字数交叉渐变（0→最暗，5000 字→最亮），飘雪 canvas 叠在壁纸之上、界面之下。
-   放大 105%：宽度适应（宽度 = 105% 视口宽，高度等比），从顶部放置，超出底部的部分被裁切。 */
+   保持原图大小：宽度适应（宽度 = 100% 视口宽，高度等比），从顶部放置，超出底部的部分被裁切。 */
 .wallpaper{position:fixed;inset:0;pointer-events:none;z-index:0;transform-origin:center center}
-.wallpaper-layer{position:absolute;inset:0;background-size:calc(var(--wallpaper-zoom,1.05)*100%) auto;background-position:var(--wallpaper-position);background-repeat:no-repeat;opacity:0;transition:opacity 1.15s cubic-bezier(.22,.7,.18,1)}
+.wallpaper-layer{position:absolute;inset:0;background-size:calc(var(--wallpaper-zoom,1)*100%) auto;background-position:var(--wallpaper-position);background-repeat:no-repeat;opacity:0;transition:opacity 1.15s cubic-bezier(.22,.7,.18,1)}
 .wallpaper-dim{background-image:url("assets/wallpaper-dim.png")}
 .wallpaper-low{background-image:url("assets/wallpaper-low.png")}
 .wallpaper-mid{background-image:url("assets/wallpaper-mid.png")}
