@@ -14,16 +14,18 @@ svg{width:16px;height:16px;flex-shrink:0}
 input::placeholder,textarea::placeholder{color:var(--faint)}
 [hidden]{display:none!important}
 
-/* 站点目录（site-nav）：结构与其他页面完全一致（shared/site-nav.css 渲染），
-   仅把取色映射到本主题变量，实现深浅模式差异；不额外加边框或改结构。 */
-.site-nav{
-  --sn-fg:var(--text);
-  --sn-fg-muted:var(--muted);
-  --sn-fg-faint:var(--faint);
-  --sn-accent:var(--primary);
-  --sn-accent-weak:var(--selected-bg);
-  --sn-hover:var(--hover-bg);
-  --sn-line:var(--border);
+/* 站点目录（site-nav）：结构与其他页面完全一致（shared/site-nav.css 渲染）。
+   site-nav.css 通过 --ink/--brand 系列变量取色，这里把它们映射到本主题变量，
+   实现深浅模式差异；不额外加边框或改结构。
+   （site-nav.css 在本文件之后加载，因此须在 :root 提供变量而非覆盖 .site-nav。） */
+:root{
+  --ink:var(--text);
+  --ink-49:var(--muted);
+  --ink-34:var(--faint);
+  --ink-04:var(--hover-bg);
+  --line:var(--border);
+  --brand:var(--primary);
+  --brand-weak:var(--selected-bg);
 }
 
 /* 壁纸：四档雪夜市集随本章字数交叉渐变（0→最暗，5000 字→最亮），飘雪 canvas 叠在壁纸之上、界面之下 */

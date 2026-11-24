@@ -134,12 +134,13 @@ for (const file of ['themes/christmas/app.js', 'themes/christmas/snow.js', 'them
 }
 console.log('PASS: christmas dark route, word-count wallpaper gradient, snow layer and asset references');
 
-// —— 圣诞页目录：与其他页面共用同一结构，仅深浅取色差异 ——
+// —— 圣诞页目录：与其他页面共用同一结构，仅深浅取色差异（:root 映射到主题变量）——
 const christmasStyles = source('themes/christmas/styles.css');
-assert.match(christmasStyles, /\.site-nav\{[^}]*--sn-fg:var\(--text\)/);
-assert.match(christmasStyles, /--sn-accent-weak:var\(--selected-bg\)/);
+assert.match(christmasStyles, /--ink:var\(--text\)/);
+assert.match(christmasStyles, /--ink-49:var\(--muted\)/);
+assert.match(christmasStyles, /--brand-weak:var\(--selected-bg\)/);
 assert.doesNotMatch(christmasStyles, /\.site-nav-search\{border/); // 不给搜索框加其他页面没有的边框
-assert.doesNotMatch(christmasStyles, /--ink:#/); // 不再自创一套独立十六进制色
+assert.doesNotMatch(christmasStyles, /--ink:#[0-9a-f]/i); // 不再自创一套独立十六进制色
 console.log('PASS: christmas site-nav mirrors shared structure with theme-variable palette');
 
 // —— 深色模式图标：单色图标反白，品牌图标保持彩色 ——
