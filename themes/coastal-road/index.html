@@ -9,7 +9,8 @@
   <link rel="stylesheet" href="styles.css?v=10">
   <script src="stats.js?v=3" defer></script>
   <script src="app.js?v=8" defer></script>
-  <script type="module" src="motion.js?v=17"></script>
+  <!-- 动效运行时用 esbuild 打包的经典脚本（build-motion.sh 生成）：file:// 下 ES 模块被浏览器拦截，无法直接用 motion.js。 -->
+  <script src="motion-bundle.js?v=1" defer></script>
   <link rel="stylesheet" href="../../shared/site-nav.css?v=14">
   <link rel="stylesheet" href="../../shared/chapter-sidebar.css?v=2">
   <script src="../../shared/chapter-sidebar.js?v=2" defer></script>

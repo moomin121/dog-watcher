@@ -1,6 +1,13 @@
 import * as THREE from './vendor/three.module.min.js';
 import { SCENE, SPRITES, distanceAt, depthAt, coverLayout, makeRoadside } from './scene-model.js?v=8';
 import { DEFAULTS, ActivityClock, readingRect, readingFeather } from './motion-model.js?v=17';
+// 纹理用压缩变体（JPEG/WebP，由 build-motion.sh 生成）并经 esbuild --loader 内联成 data URI：
+// file:// 协议下本地图片会污染 WebGL 纹理（SecurityError），data URI 不受限制。
+// 注意：源码从此只能在打包后运行（浏览器无法直接把图片当模块导入）。
+import firstFrameUrl from './assets/first-frame.texture.jpg';
+import distantPlateUrl from './assets/distant-plate.texture.jpg';
+import fieldTextureUrl from './assets/field-texture.texture.jpg';
+import roadsideAtlasUrl from './assets/roadside-atlas.texture.webp';
 
 const quadVertex = `varying vec2 vUv;
 void main(){ vUv=uv; gl_Position=vec4(position.xy,0.,1.); }`;
@@ -142,8 +149,8 @@ export class CoastalScene {
       this.shared={uViewport:{value:new THREE.Vector2()},uDraw:{value:new THREE.Vector2()},uOrigin:{value:new THREE.Vector2()},
         uTime:{value:0},uDistance:{value:0},uReading:{value:new THREE.Vector4()},uZone:{value:new THREE.Vector4()},uFeather:{value:100}};
       const loader=new THREE.TextureLoader();
-      this.textures=await Promise.all(['first-frame.png','distant-plate.png','field-texture.png','roadside-atlas.png'].map(n=>loader.loadAsync(new URL('assets/'+n,import.meta.url).href)));
-      if(this.disposed){this.textures.forEach(t=>t.dispose());return;}
+      // 纹理为构建时内联的 data URI：file:// / http / Pages 通用，无 canvas 污染。
+      this.textures=await Promise.all([firstFrameUrl,distantPlateUrl,fieldTextureUrl,roadsideAtlasUrl].map(n=>loader.loadAsync(n)));      if(this.disposed){this.textures.forEach(t=>t.dispose());return;}
       const [original,plate,field,atlas]=this.textures;
       field.wrapS=field.wrapT=THREE.MirroredRepeatWrapping;field.anisotropy=Math.min(4,this.renderer.capabilities.getMaxAnisotropy());
       this.geometry=new THREE.PlaneGeometry(2,2);this.spriteGeometry=new THREE.PlaneGeometry(1,1);this.materials=[];

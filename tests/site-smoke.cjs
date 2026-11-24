@@ -106,6 +106,17 @@ for (const ref of [...coastal.matchAll(/(?:src|href)=["']([^"'#?]+)(?:\?[^"']*)?
 }
 console.log('PASS: coastal independent route, presets and all HTML asset references');
 
+// —— file:// 兼容：动效必须是打包后的经典脚本（file:// 拦截 ES 模块与本地图片 WebGL 纹理）——
+assert.doesNotMatch(coastal, /<script[^>]*type="module"/); // ES 模块在 file:// 下整条不可加载
+assert.match(coastal, /<script src="motion-bundle\.js\?v=\d+" defer><\/script>/);
+assert.ok(exists('themes/coastal-road/motion-bundle.js'), 'missing coastal motion bundle');
+assert.ok(exists('themes/coastal-road/build-motion.sh'), 'missing coastal motion build script');
+for (const t of ['first-frame.texture.jpg', 'distant-plate.texture.jpg', 'field-texture.texture.jpg', 'roadside-atlas.texture.webp']) {
+  assert.ok(exists(`themes/coastal-road/assets/${t}`), `missing coastal texture variant: ${t}`);
+}
+new vm.Script(source('themes/coastal-road/motion-bundle.js'), { filename: 'themes/coastal-road/motion-bundle.js' });
+console.log('PASS: coastal motion ships as classic bundle with inlined textures for file://');
+
 const christmas = source('themes/christmas/index.html');
 assert.match(christmas, /value="圣诞快乐"/);
 assert.match(christmas, /　　圣诞快乐！雪夜市集的灯一盏盏亮着，陪你在长夜里慢慢写字。<\/textarea>/);

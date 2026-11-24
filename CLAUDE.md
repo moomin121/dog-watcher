@@ -5,6 +5,7 @@
 - `write.html`：狗狗督查页面。
 - `themes/meadow/`：风吹草低视频写作主题。
 - `themes/coastal-road/`：通向海边，代码驱动的海岸动态写作主题；独立 URL，只加载当前页资源，复用 shared 目录。正文草稿独立存储于 `writing-skin:coastal-road-pages:v1`。
+  动效运行时是 `motion-bundle.js`（esbuild 打包的经典脚本，纹理以 data URI 内联）：`file://` 协议会拦截 ES 模块和本地图片的 WebGL 纹理上传，页面因此不能用 `<script type="module">` 直接跑 motion.js。修改 `motion.js / motion-model.js / scene-model.js / coastal-scene.js` 后必须跑 `themes/coastal-road/build-motion.sh`（依赖 esbuild 与带 Pillow 的 Python）重建 bundle，并把 index.html 里 motion-bundle.js 版本号 +1。`coastal-scene.js` 静态 import 了压缩纹理变体（`assets/*.texture.jpg|.webp`），源码只能在打包后运行。
 - `shared/site-nav.js`：唯一目录配置与渲染器；新增页面优先只改这里。
 - `shared/site-nav.css`：两个页面共用的目录样式。
 - `shared/chapter-sidebar.js` / `.css`：四个页面的侧栏外框，保留全书搜索和章卷按钮，下面直接展示原有「码字主题／其他」站点链接；不显示草稿、已发布、筛选、更多菜单或示例章节。
