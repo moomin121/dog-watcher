@@ -41,6 +41,8 @@
     const opacities = lightOpacities(count, brightCount);
     ['dim', 'low', 'mid', 'bright'].forEach((name, index) =>
       document.documentElement.style.setProperty(`--winter-bg-${name}`, opacities[index].toFixed(3)));
+    // 达标奖励：字数达到目标时仍显示原四档最亮图，再多打一个字才换满月市集新图
+    document.documentElement.style.setProperty('--winter-bg-goal', count > brightCount ? '1' : '0');
   }
 
   let composing = false, committedBody, saveTimer, toastTimer;

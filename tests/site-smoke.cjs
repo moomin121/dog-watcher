@@ -132,6 +132,11 @@ for (const ref of [...christmas.matchAll(/(?:src|href)=["']([^"'#?]+)(?:\?[^"']*
 for (const level of ['wallpaper-dim', 'wallpaper-low', 'wallpaper-mid', 'wallpaper-bright']) {
   assert.ok(exists(`themes/christmas/assets/${level}.png`), `missing christmas wallpaper level: ${level}`);
 }
+// 达标奖励层：达到目标字数仍是原四档最亮图，超出一个字才换满月市集新图
+assert.match(christmas, /wallpaper-layer wallpaper-goal/);
+assert.ok(exists('themes/christmas/assets/wallpaper-goal.jpg'), 'missing christmas goal wallpaper');
+assert.match(source('themes/christmas/app.js'), /--winter-bg-goal.*count > brightCount/);
+assert.match(christmasStyles, /\.wallpaper-goal\{background-image:url\("assets\/wallpaper-goal\.jpg"\)\}/);
 for (const file of ['themes/christmas/app.js', 'themes/christmas/snow.js', 'themes/christmas/stats.js']) {
   new vm.Script(source(file), { filename: file });
 }
