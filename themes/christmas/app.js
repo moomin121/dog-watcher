@@ -4,7 +4,45 @@
   const { countWords, formatTime, WritingSession } = window.MeadowStats;
   const title = $('titleInput'), body = $('bodyInput'), dialog = $('themeDialog');
   const storageKey = 'writing-skin:christmas-pages:v1';
+  const atmosphereKey = 'writing-skin:christmas:atmosphere:v1';
   const session = new WritingSession();
+
+  // 字数 → 壁纸四档渐变（source-over 累积透明度，防止中间状态透底）
+  const clamp01 = n => Math.min(1, Math.max(0, n));
+  function lightWeights(count, maxCount) {
+    const limit = Math.max(1, Number(maxCount) || 5000);
+    const t = clamp01((Math.max(0, Number(count) || 0)) / limit) * 3;
+    const lower = Math.min(2, Math.floor(t)), mix = t >= 3 ? 1 : t - lower;
+    const weights = [0, 0, 0, 0];
+    weights[lower] = 1 - mix; weights[Math.min(3, lower + 1)] = mix;
+    return weights;
+  }
+  function lightOpacities(count, maxCount) {
+    let accumulated = 0;
+    return lightWeights(count, maxCount).map((weight, index) => {
+      accumulated += weight;
+      return index === 0 ? 1 : accumulated > 0 ? weight / accumulated : 0;
+    });
+  }
+  let brightCount = 5000;
+  try {
+    const s = JSON.parse(localStorage.getItem(atmosphereKey) || 'null');
+    if (s && Number.isFinite(s.brightCount)) brightCount = Math.min(20000, Math.max(500, Math.round(s.brightCount / 100) * 100));
+  } catch {}
+  // 与 snow.js 共用同一存储：写入时保留其他字段（如 enabled）
+  function saveAtmosphere() {
+    try {
+      let merged = {};
+      try { merged = JSON.parse(localStorage.getItem(atmosphereKey) || 'null') || {}; } catch {}
+      localStorage.setItem(atmosphereKey, JSON.stringify(Object.assign(merged, { brightCount })));
+    } catch {}
+  }
+  function updateBackground(count) {
+    const opacities = lightOpacities(count, brightCount);
+    ['dim', 'low', 'mid', 'bright'].forEach((name, index) =>
+      document.documentElement.style.setProperty(`--winter-bg-${name}`, opacities[index].toFixed(3)));
+  }
+
   let composing = false, committedBody, saveTimer, toastTimer;
   let undoStack = [], redoStack = [];
   const snapshot = () => ({ title: title.value, body: body.value });
@@ -49,6 +87,7 @@
     const now = performance.now(), chapter = countWords(committedBody);
     $('statChapter').textContent = chapter.toLocaleString('zh-CN');
     $('footerCount').textContent = chapter.toLocaleString('zh-CN');
+    updateBackground(chapter);
     $('statSpeed').textContent = session.speed(now);
     $('statActive').textContent = formatTime(session.activeMs);
     $('statIdle').textContent = formatTime(session.idleMs);
@@ -116,6 +155,18 @@
   $('insertButton').addEventListener('click', () => toast('插入：该功能由客户端提供，皮肤仅预览样式'));
   ['findButton', 'nameButton', 'painterButton', 'historyButton'].forEach(id => $(id).addEventListener('click', () => toast('该功能由客户端提供，皮肤仅预览样式')));
   $('statsClose').addEventListener('click', () => { $('statsPanel').hidden = true; });
+  // 最亮档字数：修改后立即刷新壁纸渐变并保存
+  const brightInput = $('brightCount');
+  if (brightInput) {
+    brightInput.value = String(brightCount);
+    brightInput.addEventListener('change', () => {
+      const value = Number(brightInput.value);
+      brightCount = Math.min(20000, Math.max(500, Math.round((Number.isFinite(value) ? value : 5000) / 100) * 100));
+      brightInput.value = String(brightCount);
+      saveAtmosphere();
+      refresh();
+    });
+  }
   // 左侧目录：拖动调宽 / 点击收起展开（宽度记忆在本地）
   const sidebar = document.querySelector('.sidebar'), handle = $('sidebarHandle');
   const SIDEBAR_KEY = 'writing-skin:christmas:sidebar';

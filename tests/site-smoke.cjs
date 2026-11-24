@@ -119,10 +119,17 @@ assert.match(christmas, /value="圣诞快乐"/);
 assert.match(christmas, /　　圣诞快乐！雪夜市集的灯一盏盏亮着，陪你在长夜里慢慢写字。<\/textarea>/);
 assert.match(source('themes/christmas/app.js'), /christmas-pages:v1/);
 assert.match(christmas, /id="snowCanvas"/);
+assert.match(christmas, /wallpaper-layer wallpaper-dim/);
+assert.match(christmas, /wallpaper-layer wallpaper-bright/);
+assert.match(source('themes/christmas/app.js'), /lightOpacities/);
+assert.match(christmas, /type="number" id="brightCount" min="500" max="20000" step="100" value="5000"/);
 for (const ref of [...christmas.matchAll(/(?:src|href)=["']([^"'#?]+)(?:\?[^"']*)?["']/g)].map(m=>m[1]).filter(x=>!/^https?:/.test(x))) {
   assert.ok(fs.existsSync(path.resolve(local('themes/christmas'),ref)), `missing christmas asset: ${ref}`);
+}
+for (const level of ['wallpaper-dim', 'wallpaper-low', 'wallpaper-mid', 'wallpaper-bright']) {
+  assert.ok(exists(`themes/christmas/assets/${level}.png`), `missing christmas wallpaper level: ${level}`);
 }
 for (const file of ['themes/christmas/app.js', 'themes/christmas/snow.js', 'themes/christmas/stats.js']) {
   new vm.Script(source(file), { filename: file });
 }
-console.log('PASS: christmas dark route, presets, snow layer and asset references');
+console.log('PASS: christmas dark route, word-count wallpaper gradient, snow layer and asset references');

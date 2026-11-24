@@ -17,7 +17,7 @@
 </head>
 <body data-page-id="christmas">
   <div id="pageLoading" role="status" aria-label="页面加载中"><span class="loading-spinner"></span>正在准备编辑器…</div>
-  <div class="wallpaper" aria-hidden="true"></div>
+  <div class="wallpaper" aria-hidden="true"><div class="wallpaper-layer wallpaper-dim"></div><div class="wallpaper-layer wallpaper-low"></div><div class="wallpaper-layer wallpaper-mid"></div><div class="wallpaper-layer wallpaper-bright"></div></div>
   <canvas id="snowCanvas" class="snow-canvas" aria-hidden="true"></canvas>
   <div class="app" aria-label="作家助手写作界面 · 圣诞雪夜皮肤预览">
     <header class="titlebar">
@@ -109,7 +109,7 @@
   </div>
   <dialog id="themeDialog" class="theme-dialog" aria-labelledby="themeTitle">
     <div class="dialog-head"><div><span class="eyebrow">WRITING SKIN / 05</span><h2 id="themeTitle">圣诞雪夜</h2></div><button id="closeTheme" class="close-button" aria-label="关闭皮肤设置">×</button></div>
-    <img class="theme-preview" src="assets/wallpaper.png" alt="深蓝夜空下的圣诞市集，暖灯与雪">
+    <img class="theme-preview" src="assets/wallpaper-bright.png" alt="深蓝夜空下的圣诞市集，暖灯与雪">
     <p>深色工作台：雪夜市集壁纸从正文区透出，顶栏与侧栏为深色半透明玻璃。</p>
     <div class="palette" aria-label="皮肤分区配色">
       <span style="--swatch:#0C1B2C" title="实色背景2 · 顶栏"></span>
@@ -124,9 +124,10 @@
     <fieldset class="atmosphere">
       <legend>动态氛围 · 圣诞飘雪</legend>
       <label class="switch-row"><span>飘雪<span class="switch-hint">默认轻雪，随时可停</span></span><input type="checkbox" id="snowToggle" checked></label>
-      <p class="atmosphere-hint">雪花绘制在壁纸之上、界面之下，遵循系统“减少动态”设置。调节值自动保存在本机。</p>
+      <label class="switch-row"><span>最亮档字数<span class="switch-hint">达到此字数时壁纸最亮</span></span><input type="number" id="brightCount" min="500" max="20000" step="100" value="5000" inputmode="numeric"></label>
+      <p class="atmosphere-hint">字数越多，雪夜市集的灯越亮：0 字最暗，达到设定字数时最亮。雪花绘制在壁纸之上、界面之下，遵循系统“减少动态”设置。调节值自动保存在本机。</p>
     </fieldset>
-    <div class="dialog-links"><a href="assets/wallpaper.png" target="_blank" rel="noopener">查看完整壁纸 ↗</a><a href="assets/wallpaper.png" download="圣诞雪夜-写作壁纸.png">下载壁纸 ↓</a></div>
+    <div class="dialog-links"><a href="assets/wallpaper-bright.png" target="_blank" rel="noopener">查看完整壁纸 ↗</a><a href="assets/wallpaper-bright.png" download="圣诞雪夜-写作壁纸.png">下载壁纸 ↓</a></div>
   </dialog>
   <div class="toast" id="toast" role="status" hidden></div>
   <span id="fontStatus" hidden></span>

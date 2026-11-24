@@ -9,6 +9,14 @@
   const KEY = 'writing-skin:christmas:atmosphere:v1';
   const settings = { enabled: true };
   try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && typeof s.enabled === 'boolean') settings.enabled = s.enabled; } catch {}
+  // 与 app.js 共用同一存储：写入时保留其他字段（如 brightCount）
+  function saveAtmosphere() {
+    try {
+      let merged = {};
+      try { merged = JSON.parse(localStorage.getItem(KEY) || 'null') || {}; } catch {}
+      localStorage.setItem(KEY, JSON.stringify(Object.assign(merged, { enabled: settings.enabled })));
+    } catch {}
+  }
   let width = 0, height = 0, flakes = [], last = null, raf = 0;
   function createFlake(anywhere) {
     const z = Math.random();
@@ -76,7 +84,7 @@
   const toggle = document.getElementById('snowToggle');
   if (toggle) toggle.addEventListener('input', () => {
     settings.enabled = toggle.checked;
-    try { localStorage.setItem(KEY, JSON.stringify(settings)); } catch {}
+    saveAtmosphere();
     stop(); wake();
   });
   document.addEventListener('visibilitychange', () => { stop(); if (!document.hidden) wake(); });
