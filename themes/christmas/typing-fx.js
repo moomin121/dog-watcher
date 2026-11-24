@@ -130,8 +130,8 @@
     if (!raf) raf = requestAnimationFrame(step);
   }
   let raf = 0, last = 0;
-  // 各元素的基准透明度：整体变淡，避免干扰正文阅读
-  const BASE_OPACITY = { emoji: 0.6, bell: 0.55, dot: 0.7 };
+  // 各元素的基准透明度：整体更淡，避免干扰正文阅读
+  const BASE_OPACITY = { emoji: 0.4, bell: 0.38, dot: 0.5 };
   function apply(item, k, ease) {
     if (item.kind === 'emoji') {
       const s = 1.1 * Math.sin(Math.PI * k);
