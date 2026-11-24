@@ -1,6 +1,10 @@
-/* 打字特效与音效：每次真实输入时光标处散出细小雪花，并播放轻键盘声。
+/* 打字特效与音效（对照 Figma Make「圣诞主题写作页」移植）：
+   每次真实键入——
+   1) 特效：光标处绽放一组元素：4 个发光 emoji（❄️⭐✨🎄，缩放 0→1.5→0、随机漂移旋转、
+      交错延迟 1.5s）、红黄渐变铃铛光斑（放大 3 倍 0.8s）、8 颗白粒子向八方散开（60px，1s）；
+   2) 音效：按 Jingle Bells 旋律逐音符播放（正弦振荡器，每键入一个音符，0.25s 衰减）。
    开关存于 writing-skin:christmas:atmosphere:v1（与飘雪/最亮档字数合并写，互不覆盖）。
-   遵循系统“减少动态”设置（停特效）；音效用 WebAudio 合成，无音频文件，首次输入时激活。 */
+   遵循系统“减少动态”设置（停特效）。光标定位比参考实现更准：镜像 div 复刻 textarea 排版。 */
 (function () {
   'use strict';
   const INPUT_RE = /^(insertText|insertCompositionText|insertFromComposition|insertLineBreak|insertParagraph)$/;
@@ -27,8 +31,16 @@
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
-  /* ===== 音效：短噪声过带通滤波，模拟轻键盘声，音量随机微变 ===== */
-  let ctx = null, noise = null, lastClick = 0;
+  /* ===== 音效：Jingle Bells 逐音符（E E E | E E E | E G C D E | F F F F | F E E E | E D D E D G） ===== */
+  const MELODY = [
+    659.25, 659.25, 659.25,
+    659.25, 659.25, 659.25,
+    659.25, 783.99, 523.25, 587.33, 659.25,
+    698.46, 698.46, 698.46, 698.46,
+    698.46, 659.25, 659.25, 659.25,
+    659.25, 587.33, 587.33, 659.25, 587.33, 783.99
+  ];
+  let ctx = null, noteIndex = 0;
   function ensureAudio() {
     if (!ctx) {
       const AC = window.AudioContext || window.webkitAudioContext;
@@ -38,86 +50,112 @@
     if (ctx.state === 'suspended') ctx.resume();
     return ctx;
   }
-  function ensureNoise() {
-    if (noise || !ctx) return noise;
-    const len = Math.floor(ctx.sampleRate * 0.06);
-    noise = ctx.createBuffer(1, len, ctx.sampleRate);
-    const data = noise.getChannelData(0);
-    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
-    return noise;
-  }
-  function click() {
+  function note() {
     const c = ensureAudio();
-    if (!c || c.state !== 'running' || !ensureNoise()) return;
-    const now = performance.now();
-    if (now - lastClick < 12) return; // 高速连发时限流
-    lastClick = now;
-    const t = c.currentTime, dur = 0.05;
-    const src = c.createBufferSource();
-    src.buffer = noise;
-    const filter = c.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 1400 + Math.random() * 1100;
-    filter.Q.value = 1.15;
+    if (!c || c.state !== 'running') return;
+    const frequency = MELODY[noteIndex % MELODY.length];
+    noteIndex++;
+    const t = c.currentTime;
+    const oscillator = c.createOscillator();
     const gain = c.createGain();
-    gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(0.14 + Math.random() * 0.05, t + 0.004);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    src.connect(filter).connect(gain).connect(c.destination);
-    src.start(t);
-    src.stop(t + dur + 0.01);
+    oscillator.connect(gain).connect(c.destination);
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(frequency, t);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.12, t + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
+    oscillator.start(t);
+    oscillator.stop(t + 0.25);
   }
 
-  /* ===== 特效：光标处散出小雪花，向下飘落并淡出 ===== */
+  /* ===== 特效：光标处一组绽放元素（emoji + 铃光 + 八方粒子） ===== */
   const layer = document.createElement('div');
   layer.className = 'type-fx-layer';
   layer.setAttribute('aria-hidden', 'true');
   document.body.appendChild(layer);
-  const MAX = 24;
-  let live = 0;
-  const particles = [];
-  const FLAKES = ['❄', '✦', '❅'];
-  function spark(x, y) {
-    const n = 2 + Math.round(Math.random() * 2);
-    for (let i = 0; i < n && live < MAX; i++) {
+  const EMOJI = [
+    { ch: '❄️', delay: 0, glow: '#93c5fd' },
+    { ch: '⭐', delay: 0.1, glow: '#fde047' },
+    { ch: '✨', delay: 0.2, glow: '#fef3c7' },
+    { ch: '🎄', delay: 0.15, glow: '#86efac' }
+  ];
+  const MAX_BURSTS = 6;
+  let bursts = 0;
+  const animations = [];
+  const BURST_LIFE = 1700;
+
+  function makeItem(kind, delay, life, el, dx, dy, rot, born) {
+    animations.push({ kind, delay: delay * 1000, life, el, dx, dy, rot, born });
+  }
+  function burst(x, y) {
+    if (bursts >= MAX_BURSTS) return;
+    bursts++;
+    const box = document.createElement('div');
+    box.className = 'type-fx-burst';
+    box.style.left = x + 'px';
+    box.style.top = y + 'px';
+    layer.appendChild(box);
+    const born = performance.now();
+
+    for (const e of EMOJI) {
       const el = document.createElement('span');
-      el.className = 'type-spark';
-      el.textContent = FLAKES[(Math.random() * FLAKES.length) | 0];
-      el.style.left = x + 'px';
-      el.style.top = y + 'px';
-      el.style.fontSize = (7 + Math.random() * 5).toFixed(1) + 'px';
-      layer.appendChild(el);
-      particles.push({
-        el, x: x + (Math.random() * 6 - 3), y: y - 2,
-        vx: (Math.random() * 18 - 9), vy: 16 + Math.random() * 26,
-        sway: Math.random() * Math.PI * 2, swayV: 2 + Math.random() * 3,
-        born: performance.now(), life: 620 + Math.random() * 380
-      });
-      live++;
+      el.className = 'type-fx-item type-fx-emoji';
+      el.textContent = e.ch;
+      el.style.setProperty('--glow', e.glow);
+      box.appendChild(el);
+      makeItem('emoji', e.delay, 1500, el,
+        (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100 - 50, Math.random() * 360, born);
     }
+    const bell = document.createElement('span');
+    bell.className = 'type-fx-item type-fx-bell';
+    box.appendChild(bell);
+    makeItem('bell', 0, 800, bell, 0, 0, 0, born);
+
+    for (let i = 0; i < 8; i++) {
+      const el = document.createElement('span');
+      el.className = 'type-fx-item type-fx-dot';
+      box.appendChild(el);
+      makeItem('dot', 0, 1000, el,
+        Math.cos(i * 45 * Math.PI / 180) * 60, Math.sin(i * 45 * Math.PI / 180) * 60, 0, born);
+    }
+
+    animations.push({ kind: 'burst', delay: 0, life: BURST_LIFE, el: box, born });
     if (!raf) raf = requestAnimationFrame(step);
   }
   let raf = 0, last = 0;
+  function apply(item, k, ease) {
+    if (item.kind === 'emoji') {
+      const s = 1.5 * Math.sin(Math.PI * k);
+      item.el.style.transform = 'translate(' + (item.dx * ease).toFixed(1) + 'px,' + (item.dy * ease).toFixed(1) + 'px) rotate(' + (item.rot * k).toFixed(0) + 'deg) scale(' + Math.max(0, s).toFixed(3) + ')';
+      item.el.style.opacity = (1 - k).toFixed(2);
+    } else if (item.kind === 'bell') {
+      item.el.style.transform = 'scale(' + (3 * ease).toFixed(3) + ')';
+      item.el.style.opacity = (1 - k).toFixed(2);
+    } else if (item.kind === 'dot') {
+      item.el.style.transform = 'translate(' + (item.dx * ease).toFixed(1) + 'px,' + (item.dy * ease).toFixed(1) + 'px) scale(' + (1 - k).toFixed(3) + ')';
+      item.el.style.opacity = (1 - k).toFixed(2);
+    }
+  }
   function step(now) {
     raf = 0;
-    const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
     last = now;
-    for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i];
-      const k = (now - p.born) / p.life;
-      if (k >= 1) {
-        p.el.remove();
-        particles.splice(i, 1);
-        live--;
+    for (let i = animations.length - 1; i >= 0; i--) {
+      const a = animations[i];
+      const t = now - a.born - a.delay;
+      if (a.kind === 'burst') {
+        if (t >= a.life) {
+          a.el.remove();
+          animations.splice(i, 1);
+          bursts--;
+        }
         continue;
       }
-      p.sway += p.swayV * dt;
-      p.x += p.vx * dt + Math.sin(p.sway) * 10 * dt;
-      p.y += p.vy * dt;
-      p.el.style.transform = 'translate(' + p.x.toFixed(1) + 'px,' + p.y.toFixed(1) + 'px)';
-      p.el.style.opacity = (1 - k * k).toFixed(2);
+      if (t < 0) { a.el.style.opacity = '0'; continue; }
+      const k = Math.min(1, t / a.life);
+      if (k >= 1) { a.el.style.opacity = '0'; a.el.remove(); animations.splice(i, 1); continue; }
+      apply(a, k, k * (2 - k)); // easeOut
     }
-    if (particles.length) raf = requestAnimationFrame(step);
+    if (animations.length) raf = requestAnimationFrame(step);
     else last = 0;
   }
 
@@ -144,7 +182,7 @@
     mirror.appendChild(marker);
     const m = marker.getBoundingClientRect();
     const lineHeight = parseFloat(cs.lineHeight) || 24;
-    return { x: m.left, y: m.top + lineHeight * 0.7 };
+    return { x: m.left, y: m.top + lineHeight * 0.35 };
   }
 
   /* ===== 接线 ===== */
@@ -152,9 +190,9 @@
     if (!INPUT_RE.test(event.inputType || '')) return; // 粘贴/撤销/删除等不触发
     if (settings.typingSparkle && !reduced.matches) {
       const c = caretPoint();
-      spark(c.x, c.y);
+      burst(c.x, c.y);
     }
-    if (settings.typingSound) click();
+    if (settings.typingSound) note();
   });
 
   for (const [id, prop] of [['typingSparkleToggle', 'typingSparkle'], ['typingSoundToggle', 'typingSound']]) {
@@ -172,6 +210,8 @@
   window.__typingFX = {
     settings: () => ({ ...settings }),
     audioState: () => (ctx ? ctx.state : 'none'),
-    particleCount: () => live
+    noteIndex: () => noteIndex,
+    activeBursts: () => bursts,
+    activeItems: () => animations.filter(a => a.kind !== 'burst').length
   };
 })();

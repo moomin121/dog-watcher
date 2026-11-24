@@ -176,14 +176,19 @@ assert.match(snow, /for\(const t of \[\.57,\.78\]\)/); // 六角雪晶分枝
 assert.match(snow, /recordInput\(before,after,kind\)/);
 console.log('PASS: christmas snow ports the snowfall pace model and rendering dims');
 
-// —— 打字特效与音效：光标雪花 + WebAudio 键盘声，开关合并存于氛围存储 ——
+// —— 打字特效与音效（对照 Figma Make 移植）：Jingle Bells 逐音符 + 光标处表情/铃光/粒子绽放 ——
 assert.match(christmas, /typing-fx\.js\?v=\d+/);
 assert.match(christmas, /id="typingSparkleToggle"/);
 assert.match(christmas, /id="typingSoundToggle"/);
 const typingFx = source('themes/christmas/typing-fx.js');
 assert.match(typingFx, /writing-skin:christmas:atmosphere:v1/); // 与飘雪/最亮档字数共用且合并写
 assert.match(typingFx, /AudioContext/);                          // 音效为 WebAudio 合成，无音频文件
+assert.match(typingFx, /659\.25, 659\.25, 659\.25/);             // Jingle Bells 旋律开头（E E E）
+assert.match(typingFx, /783\.99, 523\.25, 587\.33/);             // 旋律段 E G C D E
+assert.match(typingFx, /'❄️', delay: 0/);                        // 4 个发光 emoji 绽放
+assert.match(typingFx, /type-fx-bell|type-fx-dot/);              // 铃铛光斑 + 八方粒子
 assert.match(typingFx, /insertText\|insertCompositionText/);     // 只响应真实键入，粘贴/撤销不触发
 new vm.Script(typingFx, { filename: 'themes/christmas/typing-fx.js' });
-assert.match(christmasStyles, /\.type-spark\{/);
-console.log('PASS: christmas typing sparkle and keyboard sound with atmosphere storage toggles');
+assert.match(christmasStyles, /\.type-fx-emoji\{[^}]*drop-shadow/);
+assert.match(christmasStyles, /\.type-fx-bell\{[^}]*#ef4444/);
+console.log('PASS: christmas typing burst effects and Jingle Bells note-per-keystroke sound');
