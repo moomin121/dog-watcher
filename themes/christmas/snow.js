@@ -11,6 +11,14 @@
     while (b > a && c > a && before[b - 1] === after[c - 1]) { b--; c--; }
     return [...after.slice(a, c)].filter(ch => !/\s/u.test(ch)).length;
   }
+  // 删除的字符数：与 insertedCharacters 对称，驱动“雪倒着下”的节奏
+  function deletedCharacters(before, after, kind = 'deleteContentBackward') {
+    if (!/^(delete|history|cut)/i.test(kind)) return 0;
+    let a = 0, b = before.length, c = after.length;
+    while (a < b && a < c && before[a] === after[a]) a++;
+    while (b > a && c > a && before[b - 1] === after[c - 1]) { b--; c--; }
+    return [...before.slice(a, b)].filter(ch => !/\s/u.test(ch)).length;
+  }
   function snowDensity(intensity) { return 60 + Math.pow(clamp(intensity), .8) * 760; }
   function snowVelocity(intensity) { return 1 + clamp(intensity) * 1.1; }
   class SnowPace {
@@ -29,7 +37,9 @@
 
   const canvas = document.getElementById('snowCanvas'), ctx = canvas?.getContext('2d');
   if (!canvas || !ctx) return;
-  const media = matchMedia('(prefers-reduced-motion: reduce)'), pace = new SnowPace();
+  const media = matchMedia('(prefers-reduced-motion: reduce)'), pace = new SnowPace(), deletePace = new SnowPace();
+  // 方向因子：+1 正常下落；活跃删除（900ms 内有删除事件且删除节奏压过打字）时平滑过渡到 -1，雪倒着下
+  let direction = 1, lastDeleteAt = -Infinity;
   // 圣诞页只暴露"飘雪开关"；amount / quietText 沿用雪落默认值（100 / true）。
   const key = 'writing-skin:christmas:atmosphere:v1';
   const settings = {enabled: true, amount: 100, quietText: true};
@@ -50,7 +60,9 @@
       speed: 11 + z * 30, phase: Math.random() * Math.PI * 2, sway: 2 + Math.random() * 10,
       alpha: .18 + z * .68, crystal: near && Math.random() > .15, age: anywhere ? 2 : 0, visibility: 1};
   }
-  function targetCount() { return Math.min(maxParticles, Math.round((width * height / 1000000) * snowDensity(pace.intensity) * settings.amount / 100)); }
+  // 两路节奏中更活跃的一路驱动密度与速度；删除越快，倒放越快
+  const activeIntensity = () => Math.max(pace.intensity, deletePace.intensity);
+  function targetCount() { return Math.min(maxParticles, Math.round((width * height / 1000000) * snowDensity(activeIntensity()) * settings.amount / 100)); }
   function measure() {
     rect = document.querySelector('.paper')?.getBoundingClientRect();
     controls = [...document.querySelectorAll('.toolbar,.titlebar,.stats:not([hidden]),.statusbar')].map(e=>e.getBoundingClientRect()).filter(r=>r.width && r.height);
@@ -76,10 +88,17 @@
       const visibleTarget=i<target?1:0; f.visibility += (visibleTarget-f.visibility)*(1-Math.exp(-dt/1.2));
       if(!visibleTarget&&f.visibility<.02){flakes.splice(i,1);continue;}
       f.phase += dt * (.35 + f.depth * .4);
-      f.y += dt * f.speed * snowVelocity(pace.intensity);
-      f.x += dt * (drift * (.4 + f.depth) + Math.sin(f.phase) * f.sway + pace.intensity * 16);
+      // 垂直速度带方向：删除时 direction 为负，雪花向上（倒放）；速度随更活跃节奏放大
+      f.y += dt * f.speed * snowVelocity(activeIntensity()) * direction;
+      // 横向风也随方向反转：打字向右吹、删除向左吹
+      f.x += dt * (drift * (.4 + f.depth) + Math.sin(f.phase) * f.sway + (pace.intensity - deletePace.intensity) * 16);
       if (f.x>width+20) f.x=-20; if(f.x < -20)f.x=width+20;
-      if(f.y>height+16) {if(flakes.length>target){flakes.splice(i,1);continue;} flakes[i]=createFlake();continue;}
+      if (direction < 0) {
+        // 倒放：从顶部升出的雪花重新从底部进入
+        if (f.y < -20) {if(flakes.length>target){flakes.splice(i,1);continue;} const nf=createFlake(); nf.y=height+15+Math.random()*50; flakes[i]=nf;continue;}
+      } else {
+        if(f.y>height+16) {if(flakes.length>target){flakes.splice(i,1);continue;} flakes[i]=createFlake();continue;}
+      }
       let alpha=f.alpha * Math.min(1,f.age*1.5) * f.visibility;
       if(settings.quietText && rect) {
         const dx=Math.max(rect.left-f.x,0,f.x-rect.right), dy=Math.max(rect.top-f.y,0,f.y-rect.bottom);
@@ -87,7 +106,7 @@
       }
       if(controls.some(r=>f.x>=r.left&&f.x<=r.right&&f.y>=r.top&&f.y<=r.bottom)) alpha*=.22;
       ctx.globalAlpha=alpha;
-      const r=f.r*(1+pace.intensity*.12);
+      const r=f.r*(1+activeIntensity()*.12);
       if(f.crystal){
         ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.phase*.3);ctx.strokeStyle=f.depth>.89?'#f1f8ff':'#d6e9f4';ctx.lineWidth=f.depth>.89?.7:.5;ctx.lineCap='round';ctx.beginPath();
         for(let k=0;k<6;k++){
@@ -104,7 +123,13 @@
   }
   function tick(now) {
     raf=0;const dt=last===null?0:clamp((now-last)/1000,0,.05);last=now;
-    pace.step(now,dt); render(dt,now);wake();
+    pace.step(now,dt); deletePace.step(now,dt);
+    // 方向平滑切换：删除节奏压过打字节奏时倒放，0.45 秒过渡避免生硬反向；
+    // 删除停止 900ms 后即恢复下落，不留长拖尾
+    const dirTarget = now - lastDeleteAt < 900 && deletePace.intensity > pace.intensity * .6 ? -1 : 1;
+    direction += (dirTarget - direction) * (1 - Math.exp(-dt / .45));
+    if (dirTarget === 1 && Math.abs(direction - 1) < .01) direction = 1;
+    render(dt,now);wake();
   }
   function wake() { if(!raf&&!document.hidden&&settings.enabled&&!media.matches&&ctx) raf=requestAnimationFrame(tick); }
   function stop() {cancelAnimationFrame(raf);raf=0;last=null;}
@@ -115,15 +140,23 @@
   }
   const toggle = document.getElementById('snowToggle');
   if (toggle) toggle.addEventListener('input', () => { settings.enabled = toggle.checked; saveAtmosphere(); sync(); });
-  document.addEventListener('visibilitychange',()=>{stop();pace.reset();if(!document.hidden){measure();sync();}});
-  window.addEventListener('pagehide',stop);window.addEventListener('pageshow',()=>{pace.reset();resize();});
+  document.addEventListener('visibilitychange',()=>{stop();pace.reset();deletePace.reset();direction=1;lastDeleteAt=-Infinity;if(!document.hidden){measure();sync();}});
+  window.addEventListener('pagehide',stop);window.addEventListener('pageshow',()=>{pace.reset();deletePace.reset();direction=1;lastDeleteAt=-Infinity;resize();});
   window.addEventListener('resize',resize);document.getElementById('editorScroll')?.addEventListener('scroll',measure,{passive:true});
-  media.addEventListener('change',()=>{pace.reset();resize();sync();});
+  media.addEventListener('change',()=>{pace.reset();deletePace.reset();direction=1;lastDeleteAt=-Infinity;resize();sync();});
   const observer=new ResizeObserver(measure);document.querySelector('.paper')&&observer.observe(document.querySelector('.paper'));document.querySelector('.center')&&observer.observe(document.querySelector('.center'));
   window.ChristmasSnow={
-    recordInput(before,after,kind){const count=insertedCharacters(before,after,kind);if(count)pace.input(performance.now(),count);},
+    recordInput(before,after,kind){
+      const now=performance.now();
+      const ins=insertedCharacters(before,after,kind);
+      if(ins)pace.input(now,ins);
+      const del=deletedCharacters(before,after,kind);
+      if(del){deletePace.input(now,del);lastDeleteAt=now;}
+    },
     invalidate:measure,
-    getState:()=>({intensity:pace.intensity,rate:pace.rate,particleCount:flakes.length,targetCount:targetCount(),snowVelocity:snowVelocity(pace.intensity),reducedMotion:media.matches,running:!!raf,settings:{...settings}})
+    getState:()=>({intensity:pace.intensity,deleteIntensity:deletePace.intensity,direction,
+      rate:pace.rate,particleCount:flakes.length,targetCount:targetCount(),
+      snowVelocity:snowVelocity(activeIntensity()),reducedMotion:media.matches,running:!!raf,settings:{...settings}})
   };
   resize();sync();
 })();

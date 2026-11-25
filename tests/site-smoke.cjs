@@ -203,7 +203,13 @@ assert.match(snow, /alpha \*= \.18 \+ \.82 \* clamp\(Math\.max\(dx,dy\)\/85\)/);
 assert.match(snow, /alpha\*=\.22/); // 顶栏 / 工具栏 / 面板区避让淡出
 assert.match(snow, /for\(const t of \[\.57,\.78\]\)/); // 六角雪晶分枝
 assert.match(snow, /recordInput\(before,after,kind\)/);
-console.log('PASS: christmas snow ports the snowfall pace model and rendering dims');
+// —— 删除倒放：删除字符驱动独立的删除节奏，方向因子翻转为上升，速度随删除强度 ——
+assert.match(snow, /function deletedCharacters\(before, after, kind = 'deleteContentBackward'\)/);
+assert.match(snow, /deletePace\.input\(now,del\)/);      // 删除事件进入独立节奏通道
+assert.match(snow, /now - lastDeleteAt < 900/);          // 停删 900ms 后恢复下落，不留拖尾
+assert.match(snow, /f\.speed \* snowVelocity\(activeIntensity\(\)\) \* direction/); // 垂直速度带方向
+assert.match(snow, /nf\.y=height\+15\+Math\.random\(\)\*50/); // 倒放时从底部重新进入
+console.log('PASS: christmas snow ports the snowfall pace model and reverses while deleting');
 
 // —— 打字特效与音效（对照 Figma Make 移植）：Jingle Bells 逐音符 + 光标处表情/铃光/粒子绽放 ——
 assert.match(christmas, /typing-fx\.js\?v=\d+/);

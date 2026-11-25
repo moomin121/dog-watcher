@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.min.js';
-import { SCENE, SPRITES, distanceAt, depthAt, coverLayout, makeRoadside } from './scene-model.js?v=8';
+import { SCENE, SPRITES, distanceAt, depthAt, coverLayout, makeRoadside, roadsideBounds, roadsideVisibility } from './scene-model.js?v=9';
 import { DEFAULTS, ActivityClock, readingRect, readingFeather } from './motion-model.js?v=17';
 // 纹理用压缩变体（JPEG/WebP，由 build-motion.sh 生成）并经 esbuild --loader 内联成 data URI：
 // file:// 协议下本地图片会污染 WebGL 纹理（SecurityError），data URI 不受限制。
@@ -15,7 +15,8 @@ const groundFragment = `
 precision highp float;
 uniform sampler2D uOriginal, uPlate, uField;
 uniform vec2 uViewport, uDraw, uOrigin;
-uniform float uDistance, uTime;
+uniform float uDistance, uTime, uEdge, uBottom, uFeather;
+uniform vec4 uReading, uZone;
 varying vec2 vUv;
 vec3 painting(sampler2D tex, vec2 p){ return texture2D(tex,vec2(p.x,1.-p.y)).rgb; }
 void main(){
@@ -31,7 +32,13 @@ void main(){
   if(p.y>.75){
     float z=1.7/max(.0001,p.y-.75);
     float x=(p.x-.5)*z/.48;
-    float travel=z+uDistance;
+    // Advect one continuous ground surface, never cross-fade two road positions.
+    float zoneX=(px.x-uZone.x)/max(1.,uZone.z-uZone.x);
+    float sides=1.-smoothstep(uEdge-.055,uEdge,min(zoneX,1.-zoneX));
+    float bottom=smoothstep(1.-uBottom,1.-uBottom+.055,px.y/uViewport.y);
+    vec2 outside=max(max(uReading.xy-px,px-uReading.zw),vec2(0.));
+    float freedom=max(sides,bottom)*smoothstep(0.,uFeather*1.6,length(outside));
+    float travel=z+uDistance*freedom;
     vec3 grass=texture2D(uField,vec2(x/18.,travel/45.)).rgb;
     float fieldTint=sin(x*.27+sin(travel*6.2831853/180.))*sin(travel*6.2831853/45.);
     grass=mix(grass,vec3(.77,.82,.61),.22+.12*fieldTint);
@@ -85,8 +92,8 @@ void main(){
 
 // Original painted sky, advected in texture space. Reading protection reduces
 // displacement to zero; it never covers moving clouds with a different still image.
-const compositeFragment=`uniform sampler2D uStill,uLive,uSky;uniform vec2 uViewport,uDraw,uOrigin;
-uniform vec4 uReading,uZone;uniform float uEdge,uBottom,uFeather,uCloudTravel,uCloudTime,uCloudRandom,uCloudFloat,uCloudOpacity,uShore;varying vec2 vUv;
+const compositeFragment=`uniform sampler2D uLive,uSky;uniform vec2 uViewport,uDraw,uOrigin;
+uniform vec4 uReading;uniform float uFeather,uCloudTravel,uCloudTime,uCloudRandom,uCloudFloat,uCloudOpacity,uShore;varying vec2 vUv;
 vec3 sky(vec2 p){return texture2D(uSky,vec2(p.x,1.-p.y)).rgb;}
 vec3 flowingSky(vec2 p,float phase,float freedom){
  float horizon=1.-smoothstep(.52,.60,p.y);
@@ -99,12 +106,8 @@ vec3 flowingSky(vec2 p,float phase,float freedom){
 }
 void main(){vec2 px=vec2(vUv.x,1.-vUv.y)*uViewport;
  vec2 p=(px-uOrigin)/uDraw;
- float x=(px.x-uZone.x)/max(1.,uZone.z-uZone.x);
- float sides=1.-smoothstep(uEdge-.055,uEdge,min(x,1.-x));
- float bottom=smoothstep(1.-uBottom,1.-uBottom+.055,px.y/uViewport.y);
  vec2 outside=max(max(uReading.xy-px,px-uReading.zw),vec2(0.));
  float protection=smoothstep(0.,uFeather*1.6,length(outside));
- vec3 ground=mix(texture2D(uStill,vUv).rgb,texture2D(uLive,vUv).rgb,max(sides,bottom)*protection);
  float phase=fract(uCloudTravel/480.+.5)-.5;
  float second=fract(uCloudTravel/480.)-.5;
  float weight=pow(cos(phase*3.14159265),2.);
@@ -113,7 +116,7 @@ void main(){vec2 px=vec2(vUv.x,1.-vUv.y)*uViewport;
  vec3 clouds=mix(flowingSky(p,second,freedom),flowingSky(p,phase,freedom),weight);
  // 海浪缓缓拍打岸边：5 秒一个往复的循环（泡沫线随潮位进出、近岸亮带随潮涨落）。
  // 作为独立层叠加在合成结果上——海湾在画面中央，不在边缘动效带内，
- // 若放进 still/live 地面通道会永远显示静止参考帧。
+ // 海岸潮汐与道路运动分开控制。
  // 阅读保护区内取冻结相位（泡沫停在默认位置），区外随潮流动。
  float tide=sin(uCloudTime*1.2566371);
  float lap=smoothstep(-.3,.85,tide);
@@ -125,7 +128,7 @@ void main(){vec2 px=vec2(vUv.x,1.-vUv.y)*uViewport;
  float shoreGlow=water*(1.-smoothstep(.64,.70,p.y));
  float foamLive=exp(-dF*dF)*water*(.30+.55*lap);
  float foamFrozen=exp(-dFz*dFz)*water*(.30+.55*lapFrozen);
- vec3 shore=mix(texture2D(uStill,vUv).rgb,texture2D(uLive,vUv).rgb,max(sides,bottom)*protection)
+ vec3 shore=texture2D(uLive,vUv).rgb
    +uShore*(vec3(.30,.31,.29)*mix(foamFrozen,foamLive,protection)
    +vec3(.07,.075,.07)*shoreGlow*mix(lapFrozen,lap,protection));
  gl_FragColor=vec4(mix(clouds,shore,smoothstep(.595,.615,p.y)),1.);}`;
@@ -137,7 +140,7 @@ export class CoastalScene {
     this.time=0;this.cloudTime=0;this.cloudTravel=0;this.frames=0;this.raf=0;this.last=null;this.dirty=true;
     this.tick=this.tick.bind(this);this.refresh=this.refresh.bind(this);
     this.onLost=e=>{e.preventDefault();this.ready=false;this.cancel();this.canvas.dataset.ready='false';onFailure('绘图中断，已显示静态壁纸。');};
-    this.onRestored=()=>queueMicrotask(()=>{if(!this.disposed){this.ready=true;this.dirty=true;this.referenceDirty=true;this.draw();this.canvas.dataset.ready='true';canvas.dispatchEvent(new Event('scene-restored'));}});
+    this.onRestored=()=>queueMicrotask(()=>{if(!this.disposed){this.ready=true;this.dirty=true;this.draw();this.canvas.dataset.ready='true';canvas.dispatchEvent(new Event('scene-restored'));}});
     canvas.addEventListener('webglcontextlost',this.onLost);canvas.addEventListener('webglcontextrestored',this.onRestored);
   }
   async initialize(){
@@ -145,9 +148,9 @@ export class CoastalScene {
       this.renderer=new THREE.WebGLRenderer({canvas:this.canvas,alpha:false,antialias:false,powerPreference:'low-power'});
       this.renderer.debug.onShaderError=(gl,p,v,f)=>{throw new Error(gl.getShaderInfoLog(f)||gl.getShaderInfoLog(v));};
       this.camera=new THREE.OrthographicCamera(-1,1,1,-1,.1,10);this.camera.position.z=1;
-      this.scene=new THREE.Scene();this.compositeScene=new THREE.Scene();
+      this.scene=new THREE.Scene();this.spriteScene=new THREE.Scene();this.compositeScene=new THREE.Scene();
       this.shared={uViewport:{value:new THREE.Vector2()},uDraw:{value:new THREE.Vector2()},uOrigin:{value:new THREE.Vector2()},
-        uTime:{value:0},uDistance:{value:0},uReading:{value:new THREE.Vector4()},uZone:{value:new THREE.Vector4()},uFeather:{value:100}};
+        uTime:{value:0},uDistance:{value:0},uReading:{value:new THREE.Vector4()},uZone:{value:new THREE.Vector4()},uFeather:{value:100},uEdge:{value:this.settings.edgeWidth/100},uBottom:{value:this.settings.bottomHeight/100}};
       const loader=new THREE.TextureLoader();
       // 纹理为构建时内联的 data URI：file:// / http / Pages 通用，无 canvas 污染。
       this.textures=await Promise.all([firstFrameUrl,distantPlateUrl,fieldTextureUrl,roadsideAtlasUrl].map(n=>loader.loadAsync(n)));      if(this.disposed){this.textures.forEach(t=>t.dispose());return;}
@@ -162,20 +165,19 @@ export class CoastalScene {
         const [l,t,r,b]=SPRITES[item.type].rect;
         const material=make(spriteVertex,spriteFragment,{...this.shared,uAtlas:{value:atlas},uRect:{value:new THREE.Vector4(l/1536,t/1024,r/1536,b/1024)},
           uX:{value:item.x},uZ:{value:1},uWidth:{value:item.width},uAspect:{value:(b-t)/(r-l)},uFade:{value:0},uSway:{value:item.type===2||item.type===3?.035:0}},true);
-        const mesh=new THREE.Mesh(this.spriteGeometry,material);mesh.frustumCulled=false;this.scene.add(mesh);return {...item,mesh,material};
+        const mesh=new THREE.Mesh(this.spriteGeometry,material);mesh.frustumCulled=false;this.spriteScene.add(mesh);return {...item,mesh,material};
       });
-      this.live=new THREE.WebGLRenderTarget(1,1,{depthBuffer:false});this.still=new THREE.WebGLRenderTarget(1,1,{depthBuffer:false});
-      this.mixUniforms={...this.shared,uSky:{value:original},uCloudTravel:{value:0},uCloudTime:{value:0},uCloudRandom:{value:.45},uCloudFloat:{value:10},uCloudOpacity:{value:1},uShore:{value:0},uLive:{value:this.live.texture},uStill:{value:this.still.texture},uEdge:{value:this.settings.edgeWidth/100},uBottom:{value:this.settings.bottomHeight/100}};
+      this.live=new THREE.WebGLRenderTarget(1,1,{depthBuffer:false});
+      this.mixUniforms={...this.shared,uSky:{value:original},uCloudTravel:{value:0},uCloudTime:{value:0},uCloudRandom:{value:.45},uCloudFloat:{value:10},uCloudOpacity:{value:1},uShore:{value:0},uLive:{value:this.live.texture}};
       const composite=new THREE.Mesh(this.geometry,make(quadVertex,compositeFragment,this.mixUniforms));composite.frustumCulled=false;this.compositeScene.add(composite);
       this.observer=new ResizeObserver(this.refresh);this.observer.observe(document.documentElement);
       for(const selector of ['.paper','.editor','.center']){const el=document.querySelector(selector);if(el)this.observer.observe(el);}
       window.addEventListener('resize',this.refresh);document.addEventListener('scroll',this.refresh,true);
-      this.ready=true;this.referenceDirty=true;this.draw();this.canvas.dataset.ready='true';
+      this.ready=true;this.draw();this.canvas.dataset.ready='true';
     }catch(e){this.cancel();this.ready=false;this.canvas.dataset.error=String(e.message||e);this.onFailure('动态壁纸暂时不可用，已显示静态壁纸。');throw e;}
     return this;
   }
   applySettings(settings){
-    if(settings.cloudOpacity!==undefined&&settings.cloudOpacity!==this.settings.cloudOpacity)this.referenceDirty=true;
     this.settings={...this.settings,...settings};
     if(!this.clock.pending(performance.now()))this.soft={...this.settings};
     if(this.mixUniforms){this.mixUniforms.uEdge.value=this.settings.edgeWidth/100;this.mixUniforms.uBottom.value=this.settings.bottomHeight/100;}
@@ -185,12 +187,10 @@ export class CoastalScene {
     this.dirty=false;const w=innerWidth,h=innerHeight;
     const dpr=Math.min(devicePixelRatio||1,1.5,Math.sqrt(1800000/(w*h)));
     const rw=Math.floor(w*dpr),rh=Math.floor(h*dpr);
-    if(this.canvas.width!==rw||this.canvas.height!==rh){this.renderer.setPixelRatio(dpr);this.renderer.setSize(w,h,false);this.live.setSize(this.canvas.width,this.canvas.height);this.still.setSize(this.canvas.width,this.canvas.height);this.referenceDirty=true;}
+    if(this.canvas.width!==rw||this.canvas.height!==rh){this.renderer.setPixelRatio(dpr);this.renderer.setSize(w,h,false);this.live.setSize(this.canvas.width,this.canvas.height);}
     const layout=coverLayout(w,h);this.layout=layout;
     this.shared.uViewport.value.set(w,h);this.shared.uDraw.value.set(layout.width,layout.height);this.shared.uOrigin.value.set(layout.x,layout.y);
     const zone=document.querySelector('.center')?.getBoundingClientRect()||{left:0,top:0,right:w,bottom:h};
-    const zoneKey=[zone.left,zone.top,zone.right,zone.bottom].join(',');
-    if(this.zoneKey!==zoneKey){this.zoneKey=zoneKey;this.referenceDirty=true;}
     this.shared.uZone.value.set(zone.left,zone.top,zone.right,zone.bottom);
     const editor=document.querySelector('.editor')?.getBoundingClientRect();
     const paper=document.querySelector('.paper')?.getBoundingClientRect();
@@ -204,7 +204,16 @@ export class CoastalScene {
   }
   pose(roadTime,cloudTravel,cloudTime,settings){
     this.shared.uTime.value=(roadTime%SCENE.seconds)/SCENE.seconds;this.shared.uDistance.value=distanceAt(roadTime);
-    for(const o of this.objects){const z=depthAt(o.seed,roadTime);o.material.uniforms.uZ.value=z;o.material.uniforms.uFade.value=THREE.MathUtils.smoothstep(130-z,0,45);o.mesh.renderOrder=1000-z;}
+    const reading=this.shared.uReading.value.toArray(),zone=this.shared.uZone.value.toArray();
+    for(const o of this.objects){
+      const z=depthAt(o.seed,roadTime);
+      const visibility=roadsideVisibility(roadsideBounds(o,z,this.layout),reading,zone,
+        this.shared.uViewport.value.y,this.settings,this.shared.uFeather.value);
+      o.material.uniforms.uZ.value=z;
+      o.material.uniforms.uFade.value=THREE.MathUtils.smoothstep(130-z,0,45)*visibility;
+      o.mesh.visible=o.material.uniforms.uFade.value>.001;
+      o.mesh.renderOrder=1000-z;
+    }
     this.mixUniforms.uCloudTravel.value=cloudTravel;
     this.mixUniforms.uCloudTime.value=cloudTime;
     this.mixUniforms.uCloudRandom.value=settings.cloudRandom/100;
@@ -216,15 +225,14 @@ export class CoastalScene {
 
   draw(){
     if(!this.ready||this.disposed)return;if(this.dirty)this.measure();
-    if(this.referenceDirty){
-      // Ground reference only; the sky is sampled directly in the final flow shader.
-      this.pose(0,0,0,DEFAULTS);
-      this.renderer.setRenderTarget(this.still);this.renderer.render(this.scene,this.camera);
-      this.referenceDirty=false;
-    }
     this.pose(this.time,this.cloudTravel,this.cloudTime,this.soft);
     this.renderer.setRenderTarget(this.live);this.renderer.render(this.scene,this.camera);
     this.renderer.setRenderTarget(null);this.renderer.render(this.compositeScene,this.camera);
+    // Composite complete objects last, after all screen-space ground/sky masks.
+    // The only visibility transition is one opacity for the entire object.
+    this.renderer.autoClear=false;
+    this.renderer.render(this.spriteScene,this.camera);
+    this.renderer.autoClear=true;
 
     this.frames++;Object.assign(this.canvas.dataset,{elapsed:this.time.toFixed(4),cloudTime:this.cloudTime.toFixed(4),cloudTravel:this.cloudTravel.toFixed(4),frames:String(this.frames),active:String(this.clock.pending(performance.now())),preview:String(this.clock.preview)});
   }
@@ -252,6 +260,6 @@ export class CoastalScene {
   dispose(){
     this.disposed=true;this.cancel();this.observer?.disconnect();window.removeEventListener('resize',this.refresh);document.removeEventListener('scroll',this.refresh,true);
     this.canvas.removeEventListener('webglcontextlost',this.onLost);this.canvas.removeEventListener('webglcontextrestored',this.onRestored);
-    this.materials?.forEach(m=>m.dispose());this.textures?.forEach(t=>t.dispose());this.geometry?.dispose();this.spriteGeometry?.dispose();this.live?.dispose();this.still?.dispose();this.renderer?.dispose();
+    this.materials?.forEach(m=>m.dispose());this.textures?.forEach(t=>t.dispose());this.geometry?.dispose();this.spriteGeometry?.dispose();this.live?.dispose();this.renderer?.dispose();
   }
 }

@@ -17,6 +17,35 @@ export function coverLayout(width, height, anchor = 'center bottom') {
   return { width: drawWidth, height: drawHeight, x: (width - drawWidth) * ax, y: (height - drawHeight) * ay };
 }
 
+const smooth = (a, b, value) => {
+  const t = Math.max(0, Math.min(1, (value - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+};
+
+// Use the whole projected object for reading protection. Never mask individual
+// pixels of a tree/house against the still frame: that leaves detached fragments.
+export function roadsideBounds(item, z, layout) {
+  const [l, t, r, b] = SPRITES[item.type].rect;
+  const sway = item.type === 2 || item.type === 3 ? .035 : 0;
+  const left = project(item.x - item.width / 2 - sway, z);
+  const right = project(item.x + item.width / 2 + sway, z);
+  const top = project(item.x, z, item.width * (b - t) / (r - l));
+  return [layout.x + left.x * layout.width, layout.y + top.y * layout.height,
+    layout.x + right.x * layout.width, layout.y + left.y * layout.height];
+}
+
+export function roadsideVisibility(bounds, reading, zone, height, settings, feather) {
+  const [left, top, right, bottom] = bounds;
+  const x = ((left + right) / 2 - zone[0]) / Math.max(1, zone[2] - zone[0]);
+  const edge = settings.edgeWidth / 100;
+  const sides = 1 - smooth(edge - .055, edge, Math.min(x, 1 - x));
+  const lower = smooth(1 - settings.bottomHeight / 100,
+    1 - settings.bottomHeight / 100 + .055, bottom / height);
+  const clearance = Math.hypot(Math.max(reading[0] - right, left - reading[2], 0),
+    Math.max(reading[1] - bottom, top - reading[3], 0));
+  return Math.max(sides, lower) * smooth(0, feather * 1.6, clearance);
+}
+
 // Atlas regions exclude neighboring objects; PNG alpha is preserved at runtime.
 export const SPRITES = Object.freeze([
   { name: 'cottage', rect: [24, 130, 506, 498] },
